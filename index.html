@@ -118,6 +118,11 @@ body.bg-on .legend{color:#454b59;text-shadow:0 1px 2px rgba(255,255,255,.9);}
 .bg-item .tag{position:absolute;left:0;right:0;bottom:0;font-size:10px;font-weight:700;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.55));padding:14px 6px 5px;text-align:center;}
 .bg-item .bgnone{font-size:12px;font-weight:700;color:#7c818e;text-align:center;padding:0 6px;line-height:1.4;}
 .bg-item .delx{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(224,72,111,.95);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3);}
+.verline{font-size:11px;color:#8b91a0;text-align:center;margin-top:8px;font-weight:700;}
+.dlginput{width:100%;margin-top:14px;border:1.5px solid #e7e9f0;border-radius:12px;padding:12px 14px;font-size:16px;font-family:inherit;font-weight:700;color:#14161c;outline:none;}
+.dlginput:focus{border-color:#5856d6;}
+.dlgbtns{display:flex;gap:10px;margin-top:18px;}
+.dlgbtns .btn{flex:1;}
 .bghint{grid-column:1/-1;font-size:12px;color:#8b91a0;text-align:center;padding:14px 10px;line-height:1.6;}
 .bg-row{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding:12px 2px;border-top:1px solid var(--line);font-size:14px;font-weight:700;}
 .btn{border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:800;border-radius:11px;padding:11px 14px;font-family:inherit;}
@@ -167,6 +172,7 @@ label.btn{display:inline-flex;align-items:center;justify-content:center;cursor:p
 <div class="sheet" id="bgSheet">
   <div class="grab"></div><div class="wk-title2">背景</div><span class="m-close" onclick="closeBg()">✕</span>
   <div class="tabs" id="bgTabs"></div>
+  <div class="verline" id="verLine"></div>
   <div class="bg-grid" id="bgGrid"></div>
   <div class="bg-row"><span>每次打开随机换一张</span><div class="sw" id="swRand"></div></div>
   <div class="bg-row"><span>用自己的照片 / 视频 / 实况</span><label class="btn" for="fileIn">从相册选</label></div>
@@ -177,6 +183,14 @@ label.btn{display:inline-flex;align-items:center;justify-content:center;cursor:p
   <input type="file" id="fileIn" accept="image/*,video/*" class="filehid">
 </div>
 
+<div class="mask" id="maskD" onclick="closeDlg()"></div>
+<div class="modal" id="dlg" onclick="if(event.target===this)closeDlg()">
+  <div class="mcard" style="max-width:330px">
+    <div class="m-title" id="dlgTitle" style="font-size:18px"></div>
+    <input id="dlgInput" class="dlginput" type="text" style="display:none">
+    <div class="dlgbtns"><button class="btn ghost" id="dlgNo" type="button">取消</button><button class="btn" id="dlgYes" type="button">确定</button></div>
+  </div>
+</div>
 <div class="mask" id="mask" onclick="closeModal()"></div>
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="mcard">
@@ -402,24 +416,32 @@ function renderTabs(){
   });
 }
 function addCat(){
-  const name=prompt('新建分类名称：','我的收藏');
-  if(!name)return;
-  const cs=getUserCats(); const id='c'+Date.now(); cs.push({id:id,name:name}); setUserCats(cs);
-  bgCat='u:'+id; renderTabs(); renderBgGrid();
+  askText('新建分类','我的收藏',function(name){
+    if(!name)return;
+    const cs=getUserCats(); const id='c'+Date.now(); cs.push({id:id,name:name}); setUserCats(cs);
+    bgCat='u:'+id; renderTabs(); renderBgGrid();
+  });
 }
 function openBg(){renderTabs();renderBgGrid();document.getElementById('swRand').classList.toggle('on',bgRand);document.getElementById('swEdit').classList.toggle('on',bgEdit);document.getElementById('bgSheet').classList.add('show');document.getElementById('mask3').classList.add('show');}
 function closeBg(){document.getElementById('bgSheet').classList.remove('show');document.getElementById('mask3').classList.remove('show');}
-function pickFromGallery(){
-  try{ if(window.AndroidBridge&&window.AndroidBridge.pickMedia){ window.AndroidBridge.pickMedia(); return; } }catch(e){}
-  document.getElementById('fileIn').click();
+function tryNativePick(ev){
+  try{
+    if(window.AndroidBridge&&window.AndroidBridge.pickMedia){
+      if(ev&&ev.preventDefault)ev.preventDefault();
+      window.AndroidBridge.pickMedia();
+      return false;
+    }
+  }catch(e){}
+  return true;
 }
+function pickFromGallery(){ try{ if(window.AndroidBridge&&window.AndroidBridge.pickMedia){ window.AndroidBridge.pickMedia(); return; } }catch(e){} document.getElementById('fileIn').click(); }
 function renderBgGrid(){
   const g=document.getElementById('bgGrid');g.innerHTML='';
   const isUser=(bgCat==='my')||(bgCat.indexOf('u:')===0);
   if(isUser){
     const catId=(bgCat.indexOf('u:')===0)?bgCat.slice(2):'my';
-    const add=el('div','bg-item');add.innerHTML='<div class="bgnone">＋ 从相册添加</div>';
-    add.onclick=pickFromGallery; g.appendChild(add);
+    const add=el('label','bg-item');add.setAttribute('for','fileIn');add.innerHTML='<div class="bgnone">＋ 从相册添加</div>';
+    add.onclick=function(ev){ return tryNativePick(ev); }; g.appendChild(add);
     const items=getUserItems().filter(it=>(it.c||'my')===catId);
     items.forEach(it=>{
       const ti=el('div','bg-item'+(selBg===it.u?' active':''));
@@ -433,9 +455,9 @@ function renderBgGrid(){
     if(!items.length) g.appendChild(el('div','bghint','点「＋ 从相册添加」，把自己的照片/视频/实况放进来'));
     if(bgCat.indexOf('u:')===0){
       const del=el('div','bg-item');del.innerHTML='<div class="bgnone" style="color:#e0486f">删除本分类</div>';
-      del.onclick=()=>{ if(!confirm('删除这个分类？里面的素材也会一起删掉'))return; const cid=bgCat.slice(2);
+      del.onclick=()=>{ askConfirm('删除这个分类？里面的素材也会一起删掉',()=>{ const cid=bgCat.slice(2);
         setUserItems(getUserItems().filter(it=>(it.c||'my')!==cid));
-        setUserCats(getUserCats().filter(c=>c.id!==cid)); bgCat='my'; renderTabs(); renderBgGrid(); };
+        setUserCats(getUserCats().filter(c=>c.id!==cid)); bgCat='my'; renderTabs(); renderBgGrid(); }); };
       g.appendChild(del);
     }
     return;
@@ -452,7 +474,7 @@ function renderBgGrid(){
   });
   if(bgCat==='anime'){ /* 无背景项已在 BGS 里 */ }
 }
-function doRemove(u){ if(!confirm('删除这张素材？'))return; setUserItems(getUserItems().filter(it=>it.u!==u)); if(selBg===u){selBg='none';localStorage.setItem('kb_bg','none');applyBg('none');} renderBgGrid(); }
+function doRemove(u){ askConfirm('删除这张素材？',function(){ setUserItems(getUserItems().filter(it=>it.u!==u)); if(selBg===u){selBg='none';localStorage.setItem('kb_bg','none');applyBg('none');} renderBgGrid(); }); }
 window.__onPicked=function(uri,mime,name){
   const kind=((mime||'').indexOf('video')===0)?'video':'image';
   const catId=(bgCat.indexOf('u:')===0)?bgCat.slice(2):'my';
@@ -509,9 +531,30 @@ let scrimPct=parseInt(localStorage.getItem('kb_scrim')||'30',10);
 if(isNaN(scrimPct))scrimPct=30;
 function applyScrim(v){scrimPct=v;document.getElementById('scrim').style.opacity=(v/100);localStorage.setItem('kb_scrim',String(v));const sv=document.getElementById('scrimVal');if(sv)sv.textContent=v+'%';const sr=document.getElementById('scrimRange');if(sr)sr.value=v;}
 window.addEventListener('load',function(){const sr=document.getElementById('scrimRange');if(sr){sr.value=scrimPct;sr.addEventListener('input',function(){applyScrim(parseInt(this.value,10));});}});
+let dlgCb=null;
+function openDlg(title,showInput,def,cb){
+  dlgCb=cb; const d=document.getElementById('dlg'), inp=document.getElementById('dlgInput');
+  document.getElementById('dlgTitle').textContent=title;
+  inp.style.display=showInput?'block':'none'; inp.value=def||'';
+  d.classList.add('show'); document.getElementById('maskD').classList.add('show');
+  if(showInput)setTimeout(function(){try{inp.focus();}catch(e){}},120);
+}
+function closeDlg(){ document.getElementById('dlg').classList.remove('show'); document.getElementById('maskD').classList.remove('show'); dlgCb=null; }
+function askText(title,def,cb){ openDlg(title,true,def,function(ok,val){ if(ok)cb(val); }); }
+function askConfirm(title,cb){ openDlg(title,false,'',function(ok){ if(ok)cb(); }); }
+document.getElementById('dlgYes').onclick=function(){ const c=dlgCb, v=document.getElementById('dlgInput').value.trim(); closeDlg(); if(c)c(true,v); };
+document.getElementById('dlgNo').onclick=function(){ const c=dlgCb; closeDlg(); if(c)c(false,''); };
+document.getElementById('dlgInput').addEventListener('keydown',function(e){ if(e.key==='Enter')document.getElementById('dlgYes').click(); });
+function showVer(){
+  let v='网页版';
+  try{ if(window.AndroidBridge&&window.AndroidBridge.version) v='App v'+window.AndroidBridge.version(); }catch(e){}
+  const el2=document.getElementById('verLine'); if(el2) el2.textContent='当前版本：'+v+(v==='网页版'?'（请装 APK 才能用相册）':'');
+}
+window.addEventListener('load',showVer);
 renderAll();
 applyBg(activeBg);
 applyScrim(scrimPct);
+showVer();
 pushReminders();
 </script>
 </body>
