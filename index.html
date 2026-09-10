@@ -11,51 +11,49 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{background:#f5f6fa;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","HarmonyOS Sans SC","MiSans","Microsoft YaHei",sans-serif;overscroll-behavior:none;}
 body{max-width:640px;margin:0 auto;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;user-select:none;font-weight:600;}
-.app{padding-top:var(--safe-top);padding-bottom:30px;}
+.app{padding-top:var(--safe-top);padding-bottom:24px;}
 
-.topbar{position:sticky;top:0;z-index:20;background:#fff;display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);}
-.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#5856d6,#9b51e0);color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;flex:none;}
+.topbar{position:sticky;top:0;z-index:20;background:#fff;display:flex;align-items:center;gap:8px;padding:9px 10px;border-bottom:1px solid var(--line);}
+.logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#5856d6,#9b51e0);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex:none;}
 .wk{flex:1;min-width:0;}
-.wk-title{font-size:20px;font-weight:800;display:flex;align-items:center;gap:5px;}
+.wk-title{font-size:19px;font-weight:800;display:flex;align-items:center;gap:5px;}
 .wk-title .caret{font-size:12px;color:#9aa0ad;}
-.wk-sub{font-size:11px;color:var(--soft);margin-top:2px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.navs{display:flex;gap:6px;flex:none;}
-.navbtn{width:36px;height:36px;border-radius:11px;background:#f2f3f8;color:#454b59;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;}
+.wk-sub{font-size:10.5px;color:var(--soft);margin-top:2px;font-weight:700;white-space:nowrap;}
+.navs{display:flex;gap:5px;flex:none;}
+.navbtn{width:32px;height:32px;border-radius:10px;background:#f2f3f8;color:#454b59;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;}
 .navbtn:active{background:#e6e8f2;}
-.navbtn.today{font-size:13px;background:rgba(88,86,214,.12);color:var(--accent);}
+.navbtn.today{font-size:12.5px;background:rgba(88,86,214,.12);color:var(--accent);}
 .chipnow{font-size:9.5px;color:#fff;background:var(--accent);border-radius:6px;padding:1px 5px;font-weight:700;}
 
 .pager{overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .pager::-webkit-scrollbar{display:none;}
 .pager .track{display:flex;align-items:flex-start;}
 .page{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;padding:6px 6px 8px;}
-.grid{display:grid;grid-template-columns:16px 58px repeat(5,1fr) 22px 22px;grid-template-rows:40px 64px 64px 64px 64px 72px 64px 64px 64px 72px 64px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 5px 20px rgba(20,22,28,.08);}
+.grid{display:grid;grid-template-columns:58px repeat(5,1fr) 22px 22px;
+  grid-template-rows:40px 22px 62px 62px 62px 62px 22px 62px 62px 62px 62px 22px 62px 62px;
+  background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 5px 20px rgba(20,22,28,.08);}
 .ghead{display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;color:var(--faint);font-weight:700;border-bottom:1px solid var(--line);}
 .ghead .lnum{display:inline-flex;min-width:25px;height:25px;border-radius:50%;align-items:center;justify-content:center;font-size:14.5px;font-weight:800;margin-top:1px;color:var(--ink);}
 .ghead.today{color:var(--accent);}
 .ghead.today .lnum{background:var(--accent);color:#fff;}
 .ghead.wknd{font-size:10px;color:#c3c7d1;}
 .ghead.wknd .lnum{font-size:11px;min-width:auto;height:auto;color:#b9bdc8;margin-top:0;}
-.sectband{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;writing-mode:vertical-rl;letter-spacing:2px;}
-.sectband.am{background:#eef0ff;color:#5b5bd6;}
-.sectband.pm{background:#e8f7f4;color:#12a08f;}
-.sectband.ev{background:#f4edff;color:#8b5cf6;}
-.timecell{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 2px;background:#fcfcfe;border-right:1px solid var(--line);border-left:1px solid var(--line);border-bottom:1px solid var(--line);}
+.sectlabel{display:flex;align-items:center;gap:6px;padding-left:10px;font-size:11.5px;font-weight:800;border-top:1px solid var(--line);}
+.sectlabel.am{background:#eef0ff;color:#5b5bd6;}
+.sectlabel.pm{background:#e8f7f4;color:#12a08f;}
+.sectlabel.ev{background:#f4edff;color:#8b5cf6;}
+.timecell{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 2px;background:#fcfcfe;border-right:1px solid var(--line);border-bottom:1px solid var(--line);}
 .timecell .pn{font-size:13.5px;font-weight:800;color:var(--ink);white-space:nowrap;line-height:1.1;}
 .timecell .pt{font-size:9px;font-weight:700;color:#8a90a0;margin-top:4px;white-space:nowrap;font-variant-numeric:tabular-nums;}
-.timecell.sep{border-top:3px solid #dfe3f0;}
 .course{position:relative;border-radius:12px;padding:7px 4px;margin:2.5px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;background:#fff;border:1.5px solid var(--bd);overflow:hidden;}
 .course:active{transform:scale(.96);}
 .course .cname{font-size:12.5px;font-weight:800;line-height:1.18;color:var(--ink);word-break:break-all;}
 .course .croom{font-size:9.5px;font-weight:700;line-height:1.2;margin-top:5px;color:var(--soft);word-break:break-all;}
 .course .ctype{position:absolute;top:3px;right:3px;width:14px;height:14px;border-radius:5px;background:var(--acc);color:#fff;font-size:8.5px;font-weight:800;display:flex;align-items:center;justify-content:center;}
 .bg-none{display:flex;justify-content:center;padding-top:12px;color:#e6e8f0;font-size:16px;font-weight:800;}
-.noweek{grid-column:3 / 10;grid-row:2 / 12;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--faint);gap:8px;}
-.noweek .big{font-size:32px;}
-.noweek .txt{font-size:14px;font-weight:700;}
+.noweek{display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--faint);gap:8px;}
 .legend{display:flex;flex-wrap:wrap;gap:14px;padding:12px 8px 2px;font-size:12px;font-weight:700;color:#8a8f9a;justify-content:center;}
 
-/* 中间弹窗 */
 .mask{position:fixed;inset:0;background:rgba(15,17,26,.42);z-index:50;opacity:0;pointer-events:none;transition:opacity .2s;}
 .mask.show{opacity:1;pointer-events:auto;}
 .modal{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:0 22px;opacity:0;pointer-events:none;transition:opacity .2s;}
@@ -72,7 +70,6 @@ body{max-width:640px;margin:0 auto;-webkit-font-smoothing:antialiased;text-rende
 .m-row .v{flex:1;color:var(--ink);font-size:15px;font-weight:700;line-height:1.45;}
 .m-row .v .sub{display:block;color:var(--soft);font-size:12.5px;font-weight:600;margin-top:2px;}
 
-/* 周选择 */
 .wk-title2{font-size:17px;font-weight:800;text-align:center;padding:0 30px;}
 .sheet{position:fixed;left:0;right:0;bottom:0;max-width:640px;margin:0 auto;background:#fff;z-index:55;border-radius:22px 22px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.2);transform:translateY(115%);transition:transform .28s cubic-bezier(.32,.72,.24,1);padding:8px 20px calc(var(--safe-bottom) + 18px);}
 .sheet.show{transform:translateY(0);}
@@ -134,10 +131,12 @@ const PERIODS=[
  {s:'14:40',e:'15:25'},{s:'15:35',e:'16:20'},{s:'16:30',e:'17:15'},{s:'17:25',e:'18:10'},
  {s:'19:10',e:'19:55'},{s:'20:05',e:'20:50'}
 ];
-const SECTIONS=[{name:'上午',start:1,end:4,cls:'am'},{name:'下午',start:5,end:8,cls:'pm'},{name:'晚上',start:9,end:10,cls:'ev'}];
+const SECTIONS=[{name:'上午',first:1,row:2,cls:'am'},{name:'下午',first:5,row:7,cls:'pm'},{name:'晚上',first:9,row:12,cls:'ev'}];
 const SEM_START=new Date(2026,7,31);
 const SEM_LABEL='2026-2027-1';
 const TOTAL_WEEKS=18;
+const LEAD_MIN=15;
+function rowOf(p){return p<=4?p+2:(p<=8?p+3:p+4);}
 
 var SCHEDULE=[
  {name:'财务与会计模拟实训◆',day:0,p1:1,p2:2,weeks:'2',room:'力行楼605（实验室）',teacher:'牟晓雨',cls:'本科财务2501'},
@@ -194,39 +193,40 @@ function buildWeekPage(w){
   const byDay=coursesForWeek(w);
   const grid=el('div','grid');
   const start=weekStart(w);
-  grid.appendChild(el('div','ghead','',{gridColumn:'1 / 3'}));
+  grid.appendChild(el('div','ghead','',{gridColumn:'1',gridRow:'1'}));
   for(let d=0;d<7;d++){
     const dd=new Date(start.getTime()+d*864e5);
     const h=el('div','ghead'+(d>=5?' wknd':''));
-    h.style.gridColumn=(d+3)+' / '+(d+4);
+    h.style.gridColumn=(d+2)+' / '+(d+3);h.style.gridRow='1';
     const isT=dd.getTime()===today().getTime();if(isT)h.classList.add('today');
     h.innerHTML='<span>'+DAY_NAMES[d]+'</span><span class="lnum">'+dd.getDate()+'</span>';
     grid.appendChild(h);
   }
-  SECTIONS.forEach(sec=>{grid.appendChild(el('div','sectband '+sec.cls,sec.name,{gridColumn:'1',gridRow:(sec.start+1)+' / '+(sec.end+3)}));});
+  SECTIONS.forEach(sec=>{grid.appendChild(el('div','sectlabel '+sec.cls,sec.name,{gridColumn:'1 / 9',gridRow:sec.row}));});
   for(let p=1;p<=10;p++){
-    const tc=el('div','timecell'+(p===1||p===5||p===9?' sep':''));tc.style.gridColumn='2';tc.style.gridRow=(p+1)+' / '+(p+2);
+    const tc=el('div','timecell');tc.style.gridColumn='1';tc.style.gridRow=rowOf(p);
     tc.innerHTML='<span class="pn">第'+p+'节</span><span class="pt">'+PERIODS[p-1].s+'-'+PERIODS[p-1].e+'</span>';
     grid.appendChild(tc);
   }
   let total=0;
   for(let d=0;d<7;d++){
     const list=byDay[d];
-    if(list.length===0){grid.appendChild(el('div','bg-none','·',{gridColumn:(d+3)+' / '+(d+4),gridRow:'2 / 12'}));continue;}
+    if(list.length===0){grid.appendChild(el('div','bg-none','·',{gridColumn:(d+2)+' / '+(d+3),gridRow:'2 / 15'}));continue;}
     total+=list.length;
     const laneEnd=[];const placed=list.map(s=>{let li=0;while(true){if(laneEnd[li]===undefined||laneEnd[li]<s.p1){laneEnd[li]=s.p2;break;}li++;}return {s,lane:li};});
     const lanes=laneEnd.length;
     placed.forEach(o=>{
       const s=o.s;const {title,type}=splitName(s.name);const acc=accFor(title);
       const b=el('div','course');b.style.setProperty('--acc',acc);b.style.setProperty('--bd',acc+'55');
-      b.style.gridColumn=(d+3)+' / '+(d+4);b.style.gridRow=(s.p1+1)+' / '+(s.p2+2);
+      const r1=rowOf(s.p1),r2=rowOf(s.p2);
+      b.style.gridColumn=(d+2)+' / '+(d+3);b.style.gridRow=r1+' / '+(r2+1);
       if(lanes>1){b.style.height=(100/lanes)+'%';b.style.alignSelf='start';if(o.lane>0)b.style.marginTop=(o.lane*100/lanes)+'%';}
       b.innerHTML='<div class="cname">'+title+'</div>'+(s.room?'<div class="croom">'+shortRoom(s.room)+'</div>':'')+(type?'<div class="ctype">'+type+'</div>':'');
       b.onclick=()=>openModal(s);
       grid.appendChild(b);
     });
   }
-  if(total===0){const e=el('div','noweek');e.innerHTML='<div class="big">🌤</div><div class="txt">这一周没有课</div>';grid.appendChild(e);}
+  if(total===0){const e=el('div','noweek');e.style.gridColumn='2 / 9';e.style.gridRow='2 / 15';e.innerHTML='<div class="big">🌤</div><div class="txt">这一周没有课</div>';grid.appendChild(e);}
   page.appendChild(grid);return page;
 }
 
@@ -237,11 +237,12 @@ function updateTop(){
   const st=weekStart(selWeek),en=new Date(st.getTime()+6*864e5);
   const byDay=coursesForWeek(selWeek);let c=0,pp=0;const seen=new Set();
   byDay.forEach(l=>l.forEach(s=>{pp+=(s.p2-s.p1+1);if(!seen.has(s.name)){seen.add(s.name);c++;}}));
-  document.getElementById('wkSub').textContent=(st.getMonth()+1)+'.'+st.getDate()+'—'+(en.getMonth()+1)+'.'+en.getDate()+' · 本周 '+c+' 门课 · 共 '+pp+' 节';
+  document.getElementById('wkSub').textContent=(st.getMonth()+1)+'.'+st.getDate()+'—'+(en.getMonth()+1)+'.'+en.getDate()+'  ·  本周 '+c+' 门课  ·  共 '+pp+' 节';
 }
 const pager=document.getElementById('pager');
 function snapTo(w,anim){pager.scrollTo({left:(w-1)*pager.clientWidth,behavior:anim?'smooth':'instant'});}
-let st2;pager.addEventListener('scroll',()=>{clearTimeout(st2);st2=setTimeout(()=>{const w=Math.round(pager.scrollLeft/pager.clientWidth)+1;if(w>=1&&w<=TOTAL_WEEKS&&w!==selWeek){selWeek=w;updateTop();}},90);},{passive:true});
+let raf=0;
+pager.addEventListener('scroll',()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;const w=Math.round(pager.scrollLeft/pager.clientWidth)+1;if(w>=1&&w<=TOTAL_WEEKS&&w!==selWeek){selWeek=w;updateTop();}});},{passive:true});
 document.getElementById('prevW').onclick=()=>{if(selWeek>1){selWeek--;updateTop();snapTo(selWeek,true);}};
 document.getElementById('nextW').onclick=()=>{if(selWeek<TOTAL_WEEKS){selWeek++;updateTop();snapTo(selWeek,true);}};
 document.getElementById('goToday').onclick=()=>{selWeek=curWeek;updateTop();snapTo(selWeek,true);};
@@ -250,8 +251,7 @@ function openPicker(){const g=document.getElementById('wkGrid');g.innerHTML='';f
 function closePicker(){document.getElementById('picker').classList.remove('show');document.getElementById('mask2').classList.remove('show');}
 function openModal(s){const {title,type}=splitName(s.name);const acc=accFor(title);
  document.getElementById('mTitle').textContent=title;
- document.getElementById('mBadge').style.background=acc;
- document.getElementById('mBadge').textContent=(type?type+' ':'')+s.name.replace(/^.*[★●◆◇○]/,'')+(type?({'\u2605':'讲课','\u25c6':'实验','\u25cf':'实践','\u25c7':'上机','\u25cb':'讨论'}[type]||''):'');
+ const tb=document.getElementById('mBadge');tb.style.background=acc;tb.textContent=(type?type+' ':'')+({'★':'讲课','◆':'实验','●':'实践','◇':'上机','○':'讨论'}[type]||'');
  document.getElementById('mTeacher').textContent=s.teacher||'未安排';
  document.getElementById('mRoom').textContent=s.room||'未安排';
  document.getElementById('mWeeks').textContent=fmtWeeks(s.weeks);
@@ -259,7 +259,32 @@ function openModal(s){const {title,type}=splitName(s.name);const acc=accFor(titl
  const cls=s.cls||'';const cr=document.getElementById('mClsRow');if(cls){cr.style.display='flex';document.getElementById('mCls').textContent=cls;}else cr.style.display='none';
  document.getElementById('mask').classList.add('show');document.getElementById('modal').classList.add('show');}
 function closeModal(){document.getElementById('mask').classList.remove('show');document.getElementById('modal').classList.remove('show');}
+
+function pushReminders(){
+  try{
+    if(!window.AndroidBridge||!window.AndroidBridge.schedule)return;
+    const now=Date.now(),list=[];
+    for(let w=1;w<=TOTAL_WEEKS;w++){
+      const ws=weekStart(w);
+      SCHEDULE.forEach(s=>{
+        if(!active(s,w))return;
+        const dd=new Date(ws.getTime()+s.day*864e5);
+        const hm=PERIODS[s.p1-1].s.split(':');
+        const st=new Date(dd.getFullYear(),dd.getMonth(),dd.getDate(),+hm[0],+hm[1],0,0).getTime();
+        const t=st-LEAD_MIN*60000;
+        if(t>now+30000&&t<now+14*864e5){
+          const sp=splitName(s.name);
+          list.push({t:t,title:'还有 '+LEAD_MIN+' 分钟上课',body:sp.title+(s.room?' · '+shortRoom(s.room):'')+' · '+PERIODS[s.p1-1].s+' 开始'});
+        }
+      });
+    }
+    list.sort((a,b)=>a.t-b.t);
+    window.AndroidBridge.schedule(JSON.stringify(list.slice(0,80)));
+  }catch(e){}
+}
+
 renderAll();
+pushReminders();
 </script>
 </body>
 </html>
