@@ -116,7 +116,9 @@ body.bg-on .legend{color:#454b59;text-shadow:0 1px 2px rgba(255,255,255,.9);}
 .bg-item img{width:100%;height:100%;object-fit:cover;display:block;}
 .bg-item.active{border-color:var(--accent);}
 .bg-item .tag{position:absolute;left:0;right:0;bottom:0;font-size:10px;font-weight:700;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.55));padding:14px 6px 5px;text-align:center;}
-.bg-item .bgnone{font-size:12px;font-weight:700;color:#7c818e;}
+.bg-item .bgnone{font-size:12px;font-weight:700;color:#7c818e;text-align:center;padding:0 6px;line-height:1.4;}
+.bg-item .delx{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(224,72,111,.95);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3);}
+.bghint{grid-column:1/-1;font-size:12px;color:#8b91a0;text-align:center;padding:14px 10px;line-height:1.6;}
 .bg-row{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding:12px 2px;border-top:1px solid var(--line);font-size:14px;font-weight:700;}
 .btn{border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:800;border-radius:11px;padding:11px 14px;font-family:inherit;}
 .btn.ghost{background:#f2f3f8;color:#3a3f4a;}
@@ -164,18 +166,13 @@ label.btn{display:inline-flex;align-items:center;justify-content:center;cursor:p
 <div class="mask" id="mask3" onclick="closeBg()"></div>
 <div class="sheet" id="bgSheet">
   <div class="grab"></div><div class="wk-title2">背景</div><span class="m-close" onclick="closeBg()">✕</span>
-  <div class="tabs" id="bgTabs">
-    <span class="tab active" data-cat="anime">二次元</span>
-    <span class="tab" data-cat="scenery">风景</span>
-    <span class="tab" data-cat="healing">治愈</span>
-    <span class="tab" data-cat="video">动态</span>
-    <span class="tab" data-cat="mine">我的</span>
-  </div>
+  <div class="tabs" id="bgTabs"></div>
   <div class="bg-grid" id="bgGrid"></div>
   <div class="bg-row"><span>每次打开随机换一张</span><div class="sw" id="swRand"></div></div>
   <div class="bg-row"><span>用自己的照片 / 视频 / 实况</span><label class="btn" for="fileIn">从相册选</label></div>
   <div class="bg-row"><span>背景浓度（图片清晰度）</span><span id="scrimVal" style="font-weight:800;color:#5856d6;min-width:44px;text-align:right">30%</span></div>
   <div class="rngrow"><input type="range" id="scrimRange" min="0" max="85" step="5" value="30"></div>
+  <div class="bg-row"><span>编辑模式（删除不要的图）</span><div class="sw" id="swEdit"></div></div>
   <div class="bg-row"><span>恢复默认（无背景）</span><button class="btn ghost" id="btnReset">恢复</button></div>
   <input type="file" id="fileIn" accept="image/*,video/*" class="filehid">
 </div>
@@ -375,43 +372,108 @@ function applyBg(id){
     });
     return;
   }
-  if(/\.(mp4|webm|mov)(\?|$)/i.test(id)){v.src=id;v.style.display='block';v.loop=true;v.muted=true;v.play().catch(()=>{});return;}
+  if(kindOf(id)==='video'){v.src=id;v.style.display='block';v.loop=true;v.muted=true;v.play().catch(()=>{});return;}
   bg.style.backgroundImage='url("'+id+'")';bg.style.display='block';
 }
 let bgCat='anime';
-function openBg(){renderBgGrid();document.getElementById('swRand').classList.toggle('on',bgRand);document.getElementById('bgSheet').classList.add('show');document.getElementById('mask3').classList.add('show');}
+let bgEdit=false;
+function getUserCats(){try{return JSON.parse(localStorage.getItem('kb_ucats')||'[]');}catch(e){return [];}}
+function setUserCats(a){localStorage.setItem('kb_ucats',JSON.stringify(a));}
+function getUserItems(){try{return JSON.parse(localStorage.getItem('kb_uitems')||'[]');}catch(e){return [];}}
+function setUserItems(a){localStorage.setItem('kb_uitems',JSON.stringify(a));}
+function getHidden(){try{return JSON.parse(localStorage.getItem('kb_hidden')||'[]');}catch(e){return [];}}
+function setHidden(a){localStorage.setItem('kb_hidden',JSON.stringify(a));}
+function kindOf(id){
+  const it=getUserItems().find(x=>x.u===id); if(it) return it.k;
+  return /\.(mp4|webm|mov)(\?|$)/i.test(id)?'video':'image';
+}
+function allCats(){
+  const base=[{id:'anime',n:'二次元'},{id:'scenery',n:'风景'},{id:'healing',n:'治愈'},{id:'video',n:'动态'},{id:'my',n:'我的'}];
+  getUserCats().forEach(c=>base.push({id:'u:'+c.id,n:c.name}));
+  base.push({id:'__add',n:'＋'});
+  return base;
+}
+function renderTabs(){
+  const box=document.getElementById('bgTabs');box.innerHTML='';
+  allCats().forEach(c=>{
+    const s=el('span','tab'+(bgCat===c.id?' active':''),c.n);
+    s.onclick=()=>{ if(c.id==='__add'){addCat();return;} bgCat=c.id; renderTabs(); renderBgGrid(); };
+    box.appendChild(s);
+  });
+}
+function addCat(){
+  const name=prompt('新建分类名称：','我的收藏');
+  if(!name)return;
+  const cs=getUserCats(); const id='c'+Date.now(); cs.push({id:id,name:name}); setUserCats(cs);
+  bgCat='u:'+id; renderTabs(); renderBgGrid();
+}
+function openBg(){renderTabs();renderBgGrid();document.getElementById('swRand').classList.toggle('on',bgRand);document.getElementById('swEdit').classList.toggle('on',bgEdit);document.getElementById('bgSheet').classList.add('show');document.getElementById('mask3').classList.add('show');}
 function closeBg(){document.getElementById('bgSheet').classList.remove('show');document.getElementById('mask3').classList.remove('show');}
-function paintTabs(){document.querySelectorAll('#bgTabs .tab').forEach(x=>x.classList.toggle('active',x.dataset.cat===bgCat));}
+function pickFromGallery(){
+  try{ if(window.AndroidBridge&&window.AndroidBridge.pickMedia){ window.AndroidBridge.pickMedia(); return; } }catch(e){}
+  document.getElementById('fileIn').click();
+}
 function renderBgGrid(){
-  paintTabs();
   const g=document.getElementById('bgGrid');g.innerHTML='';
-  if(bgCat==='mine'){
-    const it=el('div','bg-item'+(selBg==='custom'?' active':''));
-    it.innerHTML='<div class="bgnone">我的最新</div>';
-    it.onclick=()=>{selBg='custom';localStorage.setItem('kb_bg','custom');activeBg='custom';applyBg('custom');closeBg();};
-    if(selBg==='custom')g.appendChild(it);
-    const pick=el('label','bg-item');pick.setAttribute('for','fileIn');pick.innerHTML='<div class="bgnone">＋ 从相册选</div>';g.appendChild(pick);
+  const isUser=(bgCat==='my')||(bgCat.indexOf('u:')===0);
+  if(isUser){
+    const catId=(bgCat.indexOf('u:')===0)?bgCat.slice(2):'my';
+    const add=el('div','bg-item');add.innerHTML='<div class="bgnone">＋ 从相册添加</div>';
+    add.onclick=pickFromGallery; g.appendChild(add);
+    const items=getUserItems().filter(it=>(it.c||'my')===catId);
+    items.forEach(it=>{
+      const ti=el('div','bg-item'+(selBg===it.u?' active':''));
+      ti.innerHTML=(it.k==='video'
+        ? '<video src="'+it.u+'" muted loop playsinline autoplay></video>'
+        : '<img src="'+it.u+'">')+'<div class="tag">'+(it.n||'我的')+'</div>';
+      if(bgEdit){ const x=el('span','delx','✕'); x.onclick=(ev)=>{ev.stopPropagation();doRemove(it.u);}; ti.appendChild(x); }
+      ti.onclick=()=>{ if(bgEdit){doRemove(it.u);return;} selBg=it.u; localStorage.setItem('kb_bg',it.u); activeBg=it.u; applyBg(it.u); renderBgGrid(); closeBg(); };
+      g.appendChild(ti);
+    });
+    if(!items.length) g.appendChild(el('div','bghint','点「＋ 从相册添加」，把自己的照片/视频/实况放进来'));
+    if(bgCat.indexOf('u:')===0){
+      const del=el('div','bg-item');del.innerHTML='<div class="bgnone" style="color:#e0486f">删除本分类</div>';
+      del.onclick=()=>{ if(!confirm('删除这个分类？里面的素材也会一起删掉'))return; const cid=bgCat.slice(2);
+        setUserItems(getUserItems().filter(it=>(it.c||'my')!==cid));
+        setUserCats(getUserCats().filter(c=>c.id!==cid)); bgCat='my'; renderTabs(); renderBgGrid(); };
+      g.appendChild(del);
+    }
     return;
   }
-  BGS.filter(b=>b.cat===bgCat||(bgCat==='anime'&&b.id==='none')).forEach(b=>{
+  const hidden=getHidden();
+  BGS.filter(b=>(b.cat===bgCat)&&!hidden.includes(b.id)).forEach(b=>{
     const it=el('div','bg-item'+(selBg===b.id?' active':''));
     if(b.id==='none')it.innerHTML='<div class="bgnone">无背景</div>';
     else if(/\.(mp4|webm|mov)$/i.test(b.id))it.innerHTML='<video src="'+b.id+'" muted loop playsinline autoplay></video><div class="tag">'+b.n+' ▶</div>';
-    else it.innerHTML='<img src="'+b.id+'" alt=""><div class="tag">'+b.n+'</div>';
-    it.onclick=()=>{selBg=b.id;localStorage.setItem('kb_bg',b.id);activeBg=b.id;applyBg(b.id);renderBgGrid();closeBg();};
+    else it.innerHTML='<img src="'+b.id+'"><div class="tag">'+b.n+'</div>';
+    if(bgEdit&&b.id!=='none'){ const x=el('span','delx','✕'); x.onclick=(ev)=>{ev.stopPropagation();const h=getHidden();h.push(b.id);setHidden(h);renderBgGrid();}; it.appendChild(x); }
+    it.onclick=()=>{ if(bgEdit){ if(b.id==='none')return; const h=getHidden();h.push(b.id);setHidden(h);renderBgGrid();return;} selBg=b.id; localStorage.setItem('kb_bg',b.id); activeBg=b.id; applyBg(b.id); renderBgGrid(); closeBg(); };
     g.appendChild(it);
   });
+  if(bgCat==='anime'){ /* 无背景项已在 BGS 里 */ }
 }
-document.getElementById('bgTabs').addEventListener('click',e=>{const s=e.target.closest('.tab');if(!s)return;bgCat=s.dataset.cat;renderBgGrid();});
+function doRemove(u){ if(!confirm('删除这张素材？'))return; setUserItems(getUserItems().filter(it=>it.u!==u)); if(selBg===u){selBg='none';localStorage.setItem('kb_bg','none');applyBg('none');} renderBgGrid(); }
+window.__onPicked=function(uri,mime,name){
+  const kind=((mime||'').indexOf('video')===0)?'video':'image';
+  const catId=(bgCat.indexOf('u:')===0)?bgCat.slice(2):'my';
+  const arr=getUserItems(); arr.push({u:uri,k:kind,n:(name||'我的'),c:catId}); setUserItems(arr);
+  selBg=uri; localStorage.setItem('kb_bg',uri); activeBg=uri; applyBg(uri); closeBg();
+};
 document.getElementById('fabBg').onclick=openBg;
 document.getElementById('swRand').onclick=function(){bgRand=!bgRand;localStorage.setItem('kb_bg_rand',bgRand?'1':'0');this.classList.toggle('on',bgRand);};
-document.getElementById('btnReset').onclick=()=>{selBg='none';localStorage.setItem('kb_bg','none');idbDel('bg');activeBg='none';applyBg('none');closeBg();};
+document.getElementById('swEdit').onclick=function(){bgEdit=!bgEdit;this.classList.toggle('on',bgEdit);renderBgGrid();};
+document.getElementById('btnReset').onclick=()=>{selBg='none';localStorage.setItem('kb_bg','none');activeBg='none';applyBg('none');closeBg();};
 document.getElementById('fileIn').onchange=async function(e){
-  const f=e.target.files[0];if(!f)return;
-  try{await idbPut('bg',f);}catch(err){}
-  selBg='custom';localStorage.setItem('kb_bg','custom');activeBg='custom';applyBg('custom');closeBg();
+  const f=e.target.files[0]; if(!f) return;
+  try{
+    if(f.size>8*1024*1024){ alert('文件太大（>8MB）。建议选图片，或用原生相册入口（更稳）。'); }
+    const url=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f);});
+    const kind=(f.type||'').indexOf('video')===0?'video':'image';
+    const catId=(bgCat.indexOf('u:')===0)?bgCat.slice(2):'my';
+    const arr=getUserItems(); arr.push({u:url,k:kind,n:(f.name||'我的').slice(0,14),c:catId}); setUserItems(arr);
+    selBg=url; localStorage.setItem('kb_bg',url); activeBg=url; applyBg(url); closeBg();
+  }catch(err){ alert('读取失败，换个文件试试'); }
 };
-
 /* ---------- 上课提醒 ---------- */
 function pushReminders(){
   try{
