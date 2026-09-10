@@ -440,8 +440,12 @@ function renderBgGrid(){
   const isUser=(bgCat==='my')||(bgCat.indexOf('u:')===0);
   if(isUser){
     const catId=(bgCat.indexOf('u:')===0)?bgCat.slice(2):'my';
-    const add=el('label','bg-item');add.setAttribute('for','fileIn');add.innerHTML='<div class="bgnone">＋ 从相册添加</div>';
-    add.onclick=function(ev){ return tryNativePick(ev); }; g.appendChild(add);
+    const addI=el('div','bg-item');addI.innerHTML='<div class="bgnone">＋ 相册选图片</div>';
+    addI.onclick=function(){ try{ if(window.AndroidBridge&&window.AndroidBridge.pickImage){window.AndroidBridge.pickImage();return;} }catch(e){} document.getElementById('fileIn').click(); };
+    g.appendChild(addI);
+    const addV=el('div','bg-item');addV.innerHTML='<div class="bgnone">＋ 相册选视频</div>';
+    addV.onclick=function(){ try{ if(window.AndroidBridge&&window.AndroidBridge.pickVideo){window.AndroidBridge.pickVideo();return;} }catch(e){} document.getElementById('fileIn').click(); };
+    g.appendChild(addV);
     const items=getUserItems().filter(it=>(it.c||'my')===catId);
     items.forEach(it=>{
       const ti=el('div','bg-item'+(selBg===it.u?' active':''));
@@ -452,7 +456,7 @@ function renderBgGrid(){
       ti.onclick=()=>{ if(bgEdit){doRemove(it.u);return;} selBg=it.u; localStorage.setItem('kb_bg',it.u); activeBg=it.u; applyBg(it.u); renderBgGrid(); closeBg(); };
       g.appendChild(ti);
     });
-    if(!items.length) g.appendChild(el('div','bghint','点「＋ 从相册添加」，把自己的照片/视频/实况放进来'));
+    if(!items.length) g.appendChild(el('div','bghint','点「＋ 相册选图片」或「＋ 相册选视频」，把手机相册里的素材加进来'));
     if(bgCat.indexOf('u:')===0){
       const del=el('div','bg-item');del.innerHTML='<div class="bgnone" style="color:#e0486f">删除本分类</div>';
       del.onclick=()=>{ askConfirm('删除这个分类？里面的素材也会一起删掉',()=>{ const cid=bgCat.slice(2);
@@ -475,8 +479,8 @@ function renderBgGrid(){
   if(bgCat==='anime'){ /* 无背景项已在 BGS 里 */ }
 }
 function doRemove(u){ askConfirm('删除这张素材？',function(){ setUserItems(getUserItems().filter(it=>it.u!==u)); if(selBg===u){selBg='none';localStorage.setItem('kb_bg','none');applyBg('none');} renderBgGrid(); }); }
-window.__onPicked=function(uri,mime,name){
-  const kind=((mime||'').indexOf('video')===0)?'video':'image';
+window.__onPicked=function(uri,mime,name,kind){
+  kind = kind || (((mime||'').indexOf('video')===0)?'video':'image');
   const catId=(bgCat.indexOf('u:')===0)?bgCat.slice(2):'my';
   const arr=getUserItems(); arr.push({u:uri,k:kind,n:(name||'我的'),c:catId}); setUserItems(arr);
   selBg=uri; localStorage.setItem('kb_bg',uri); activeBg=uri; applyBg(uri); closeBg();
@@ -548,7 +552,7 @@ document.getElementById('dlgInput').addEventListener('keydown',function(e){ if(e
 function showVer(){
   let v='网页版';
   try{ if(window.AndroidBridge&&window.AndroidBridge.version) v='App v'+window.AndroidBridge.version(); }catch(e){}
-  const el2=document.getElementById('verLine'); if(el2) el2.textContent='当前版本：'+v+(v==='网页版'?'（请装 APK 才能用相册）':'');
+  const el2=document.getElementById('verLine'); if(el2) el2.textContent='当前版本：'+v+(v==='网页版'?'（网页版无法调用系统相册，请装 APK）':'');
 }
 window.addEventListener('load',showVer);
 renderAll();
