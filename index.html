@@ -120,6 +120,12 @@ body.bg-on .legend{color:#454b59;text-shadow:0 1px 2px rgba(255,255,255,.9);}
 .bg-row{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding:12px 2px;border-top:1px solid var(--line);font-size:14px;font-weight:700;}
 .btn{border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:800;border-radius:11px;padding:11px 14px;font-family:inherit;}
 .btn.ghost{background:#f2f3f8;color:#3a3f4a;}
+label.btn{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;}
+.filehid{position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;}
+.rngrow{padding:2px 2px 10px;}
+.rngrow input[type=range]{-webkit-appearance:none;width:100%;height:26px;background:transparent;}
+.rngrow input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:linear-gradient(90deg,#c9c6ff,#5856d6);}
+.rngrow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid #5856d6;margin-top:-8px;box-shadow:0 2px 6px rgba(0,0,0,.2);}
 .sw{position:relative;width:46px;height:27px;border-radius:99px;background:#dfe2ea;transition:background .18s;}
 .sw.on{background:var(--accent);}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;transition:left .18s;box-shadow:0 1px 3px rgba(0,0,0,.25);}
@@ -167,9 +173,11 @@ body.bg-on .legend{color:#454b59;text-shadow:0 1px 2px rgba(255,255,255,.9);}
   </div>
   <div class="bg-grid" id="bgGrid"></div>
   <div class="bg-row"><span>每次打开随机换一张</span><div class="sw" id="swRand"></div></div>
-  <div class="bg-row"><span>用自己的照片 / 视频 / 实况</span><button class="btn" onclick="document.getElementById('fileIn').click()">从相册选</button></div>
+  <div class="bg-row"><span>用自己的照片 / 视频 / 实况</span><label class="btn" for="fileIn">从相册选</label></div>
+  <div class="bg-row"><span>背景浓度（图片清晰度）</span><span id="scrimVal" style="font-weight:800;color:#5856d6;min-width:44px;text-align:right">30%</span></div>
+  <div class="rngrow"><input type="range" id="scrimRange" min="0" max="85" step="5" value="30"></div>
   <div class="bg-row"><span>恢复默认（无背景）</span><button class="btn ghost" id="btnReset">恢复</button></div>
-  <input type="file" id="fileIn" accept="image/*,video/*" style="display:none">
+  <input type="file" id="fileIn" accept="image/*,video/*" class="filehid">
 </div>
 
 <div class="mask" id="mask" onclick="closeModal()"></div>
@@ -382,8 +390,7 @@ function renderBgGrid(){
     it.innerHTML='<div class="bgnone">我的最新</div>';
     it.onclick=()=>{selBg='custom';localStorage.setItem('kb_bg','custom');activeBg='custom';applyBg('custom');closeBg();};
     if(selBg==='custom')g.appendChild(it);
-    const pick=el('div','bg-item');pick.innerHTML='<div class="bgnone">＋ 从相册选</div>';
-    pick.onclick=()=>document.getElementById('fileIn').click();g.appendChild(pick);
+    const pick=el('label','bg-item');pick.setAttribute('for','fileIn');pick.innerHTML='<div class="bgnone">＋ 从相册选</div>';g.appendChild(pick);
     return;
   }
   BGS.filter(b=>b.cat===bgCat||(bgCat==='anime'&&b.id==='none')).forEach(b=>{
@@ -436,8 +443,13 @@ window.__dismiss=function(){
   if(b.classList.contains('show')){closeBg();return 1;}
   return 0;
 };
+let scrimPct=parseInt(localStorage.getItem('kb_scrim')||'30',10);
+if(isNaN(scrimPct))scrimPct=30;
+function applyScrim(v){scrimPct=v;document.getElementById('scrim').style.opacity=(v/100);localStorage.setItem('kb_scrim',String(v));const sv=document.getElementById('scrimVal');if(sv)sv.textContent=v+'%';const sr=document.getElementById('scrimRange');if(sr)sr.value=v;}
+window.addEventListener('load',function(){const sr=document.getElementById('scrimRange');if(sr){sr.value=scrimPct;sr.addEventListener('input',function(){applyScrim(parseInt(this.value,10));});}});
 renderAll();
 applyBg(activeBg);
+applyScrim(scrimPct);
 pushReminders();
 </script>
 </body>
