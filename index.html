@@ -16,7 +16,7 @@ body{max-width:640px;margin:0 auto;-webkit-font-smoothing:antialiased;text-rende
 #bg,#bgv{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:none;}
 #bg{background-size:cover;background-position:center;background-repeat:no-repeat;filter:saturate(1.16) contrast(1.06);}
 #bgv{object-fit:cover;}
-#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;display:none;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.42) 40%,rgba(255,255,255,.5));}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;display:none;background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(255,255,255,.54) 40%,rgba(255,255,255,.6));}
 body.bg-on #scrim{display:block;}
 .app{position:relative;z-index:2;padding-top:var(--safe-top);padding-bottom:96px;}
 
@@ -107,8 +107,8 @@ body.bg-on .legend{color:#454b59;text-shadow:0 1px 2px rgba(255,255,255,.9);}
 .wk-item.now{position:relative;}
 .wk-item.now::after{content:"本周";position:absolute;top:5px;right:6px;font-size:9px;background:var(--accent);color:#fff;border-radius:4px;padding:1px 5px;font-weight:700;}
 
-.tabs{display:flex;gap:8px;margin-top:14px;}
-.tab{flex:1;text-align:center;padding:9px 0;border-radius:11px;background:#f2f3f8;color:#5c6270;font-size:13.5px;font-weight:800;}
+.tabs{display:flex;gap:6px;margin-top:14px;}
+.tab{flex:1;text-align:center;padding:9px 0;border-radius:11px;background:#f2f3f8;color:#5c6270;font-size:12.5px;font-weight:800;white-space:nowrap;}
 .tab.active{background:var(--accent);color:#fff;}
 .bg-item video{width:100%;height:100%;object-fit:cover;display:block;}
 .bg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
@@ -133,7 +133,7 @@ body.bg-on .legend{color:#454b59;text-shadow:0 1px 2px rgba(255,255,255,.9);}
 
 <div class="app">
   <div class="topbar">
-    <div class="logo">课</div>
+    <div class="logo" id="fabBg" title="背景"><svg viewBox="0 0 24 24" width="21" height="21"><path fill="#fff" d="M21 19V5c0-1.1-.9-2-2-2H5c-.9 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z"/></svg></div>
     <div class="wk" id="wkOpen">
       <div class="wk-title"><span id="wkTitle">第 2 周</span><span class="caret">▾</span><span class="chipnow" id="chipnow" style="display:none">本周</span></div>
       <div class="wk-sub" id="wkSub"></div>
@@ -148,9 +148,6 @@ body.bg-on .legend{color:#454b59;text-shadow:0 1px 2px rgba(255,255,255,.9);}
   <div class="legend"><span>◆ 实验</span><span>● 实践</span><span>◇ 上机</span><span>○ 讨论</span><span>★ 讲课</span></div>
 </div>
 
-<div class="fab" id="fabBg">
-  <svg viewBox="0 0 24 24" width="24" height="24"><path fill="#fff" d="M21 19V5c0-1.1-.9-2-2-2H5c-.9 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z"/></svg>
-</div>
 
 <div class="mask" id="mask2" onclick="closePicker()"></div>
 <div class="sheet" id="picker">
@@ -163,6 +160,8 @@ body.bg-on .legend{color:#454b59;text-shadow:0 1px 2px rgba(255,255,255,.9);}
   <div class="grab"></div><div class="wk-title2">背景</div><span class="m-close" onclick="closeBg()">✕</span>
   <div class="tabs" id="bgTabs">
     <span class="tab active" data-cat="anime">二次元</span>
+    <span class="tab" data-cat="scenery">风景</span>
+    <span class="tab" data-cat="healing">治愈</span>
     <span class="tab" data-cat="video">动态</span>
     <span class="tab" data-cat="mine">我的</span>
   </div>
@@ -205,9 +204,15 @@ const LEAD_MIN=15;
 function rowOf(p){return p<=4?p+2:(p<=8?p+3:p+4);}
 const BGS=[
  {id:'none',n:'无背景',cat:'anime'},
- {id:'bg/a1_sunset.jpg',n:'晚霞',cat:'anime'},{id:'bg/a2_night.jpg',n:'星夜',cat:'anime'},
- {id:'bg/a3_sakura.jpg',n:'樱花',cat:'anime'},{id:'bg/a4_sea.jpg',n:'海边',cat:'anime'},
- {id:'bg/a5_cloudsea.jpg',n:'云海',cat:'anime'},{id:'bg/a6_sky.jpg',n:'青空',cat:'anime'},
+ {id:'bg/an1.jpg',n:'樱时',cat:'anime'},{id:'bg/an2.jpg',n:'雨夜霓虹',cat:'anime'},
+ {id:'bg/an3.jpg',n:'赛博天台',cat:'anime'},{id:'bg/an4.jpg',n:'花海星夜',cat:'anime'},
+ {id:'bg/an5.jpg',n:'紫花夕照',cat:'anime'},{id:'bg/an6.jpg',n:'魔法书阁',cat:'anime'},
+ {id:'bg/sc1.jpg',n:'浮空岛',cat:'scenery'},{id:'bg/sc2.jpg',n:'樱花街道',cat:'scenery'},
+ {id:'bg/sc3.jpg',n:'雨夜街道',cat:'scenery'},{id:'bg/sc4.jpg',n:'星河山湖',cat:'scenery'},
+ {id:'bg/sc5.jpg',n:'海边小镇',cat:'scenery'},{id:'bg/sc6.jpg',n:'雪国灯夜',cat:'scenery'},
+ {id:'bg/h1.jpg',n:'雨窗小憩',cat:'healing'},{id:'bg/h2.jpg',n:'暖阳猫咪',cat:'healing'},
+ {id:'bg/h3.jpg',n:'咖啡角落',cat:'healing'},{id:'bg/h4.jpg',n:'雪窗热可可',cat:'healing'},
+ {id:'bg/h5.jpg',n:'草坡蒲公英',cat:'healing'},{id:'bg/h6.jpg',n:'温室蝴蝶',cat:'healing'},
  {id:'bg/v1_aurora.mp4',n:'极光',cat:'video'},{id:'bg/v2_stars.mp4',n:'星空',cat:'video'},
  {id:'bg/v3_liquid.mp4',n:'流光',cat:'video'},{id:'bg/v4_sakura.mp4',n:'落樱',cat:'video'}
 ];
