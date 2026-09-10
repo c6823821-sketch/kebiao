@@ -173,7 +173,7 @@ body.bg-on .legend{color:#454b59;text-shadow:0 1px 2px rgba(255,255,255,.9);}
 </div>
 
 <div class="mask" id="mask" onclick="closeModal()"></div>
-<div class="modal" id="modal">
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="mcard">
     <div class="m-title" id="mTitle"></div>
     <div class="m-close" onclick="closeModal()">✕</div>
@@ -429,6 +429,13 @@ function pushReminders(){
   }catch(e){}
 }
 
+window.__dismiss=function(){
+  const m=document.getElementById('modal'),p=document.getElementById('picker'),b=document.getElementById('bgSheet');
+  if(m.classList.contains('show')){closeModal();return 1;}
+  if(p.classList.contains('show')){closePicker();return 1;}
+  if(b.classList.contains('show')){closeBg();return 1;}
+  return 0;
+};
 renderAll();
 applyBg(activeBg);
 pushReminders();
