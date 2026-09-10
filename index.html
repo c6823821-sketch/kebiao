@@ -386,7 +386,11 @@ function applyBg(id){
     });
     return;
   }
-  if(kindOf(id)==='video'){v.src=id;v.style.display='block';v.loop=true;v.muted=true;v.play().catch(()=>{});return;}
+  if(kindOf(id)==='video'){
+    if(id.indexOf('bg/')===0){ v.poster=id.replace(/([^/]+)\.(mp4|webm|mov)$/i,'poster_$1.jpg'); } else { try{v.removeAttribute('poster');}catch(e){} }
+    v.src=id;v.style.display='block';v.loop=true;v.muted=true;v.setAttribute('playsinline','');v.play().catch(()=>{});
+    return;
+  }
   bg.style.backgroundImage='url("'+id+'")';bg.style.display='block';
 }
 let bgCat='anime';
@@ -470,7 +474,7 @@ function renderBgGrid(){
   BGS.filter(b=>(b.cat===bgCat)&&!hidden.includes(b.id)).forEach(b=>{
     const it=el('div','bg-item'+(selBg===b.id?' active':''));
     if(b.id==='none')it.innerHTML='<div class="bgnone">无背景</div>';
-    else if(/\.(mp4|webm|mov)$/i.test(b.id))it.innerHTML='<video src="'+b.id+'" muted loop playsinline autoplay></video><div class="tag">'+b.n+' ▶</div>';
+    else if(/\.(mp4|webm|mov)$/i.test(b.id)){var po=b.id.replace(/([^/]+)\.(mp4|webm|mov)$/i,'poster_$1.jpg');it.innerHTML='<video src="'+b.id+'" poster="'+po+'" muted loop playsinline autoplay preload="metadata"></video><div class="tag">'+b.n+' ▶</div>';}
     else it.innerHTML='<img src="'+b.id+'"><div class="tag">'+b.n+'</div>';
     if(bgEdit&&b.id!=='none'){ const x=el('span','delx','✕'); x.onclick=(ev)=>{ev.stopPropagation();const h=getHidden();h.push(b.id);setHidden(h);renderBgGrid();}; it.appendChild(x); }
     it.onclick=()=>{ if(bgEdit){ if(b.id==='none')return; const h=getHidden();h.push(b.id);setHidden(h);renderBgGrid();return;} selBg=b.id; localStorage.setItem('kb_bg',b.id); activeBg=b.id; applyBg(b.id); renderBgGrid(); closeBg(); };
@@ -555,6 +559,9 @@ function showVer(){
   const el2=document.getElementById('verLine'); if(el2) el2.textContent='当前版本：'+v+(v==='网页版'?'（网页版无法调用系统相册，请装 APK）':'');
 }
 window.addEventListener('load',showVer);
+function kickVideo(){ try{ var v=document.getElementById('bgv'); if(v&&v.style.display!=='none'&&v.paused){ v.play().catch(function(){}); } }catch(e){} }
+document.addEventListener('touchstart',kickVideo,{passive:true});
+document.addEventListener('click',kickVideo);
 renderAll();
 applyBg(activeBg);
 applyScrim(scrimPct);
