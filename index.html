@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#f4f5f9">
+<title>我的课表</title>
+<style>
+:root{
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f4f5f9;
+  --card:#ffffff;
+  --ink:#16181f;
+  --soft:#7c818e;
+  --faint:#a7abb6;
+  --line:#ebedf3;
+  --accent:#5a5bd8;
+  --accent2:#8b5cf6;
+  --shadow:0 8px 24px rgba(23,26,35,.08);
+  --shadow-sm:0 2px 10px rgba(23,26,35,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","HarmonyOS Sans SC","MiSans","Microsoft YaHei",sans-serif;}
+body{max-width:600px;margin:0 auto;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+.app{padding-top:var(--safe-top);padding-bottom:100px;}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:20;background:var(--bg);padding:10px 16px 8px;}
+.top-inner{display:flex;align-items:center;gap:10px;}
+.logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;box-shadow:var(--shadow-sm);}
+.tb-mid{flex:1;min-width:0;}
+.tb-sem{font-size:11.5px;color:var(--soft);letter-spacing:.2px;}
+.tb-weekrow{display:flex;align-items:center;gap:6px;margin-top:3px;}
+.tb-week{font-size:21px;font-weight:800;letter-spacing:.3px;}
+.chip{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--accent);background:rgba(90,91,216,.09);border-radius:999px;padding:2px 8px;font-weight:600;}
+.chip .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);}
+.iconbtn{width:34px;height:34px;border-radius:11px;background:var(--card);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);color:#4c5160;cursor:pointer;}
+
+/* hero */
+.hero{margin:6px 16px 10px;border-radius:20px;background:linear-gradient(135deg,#5a5bd8,#7c4fe0 55%,#a151e6);color:#fff;padding:16px 18px;box-shadow:0 12px 30px rgba(90,91,216,.25);position:relative;overflow:hidden;}
+.hero::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.12);}
+.hero::before{content:"";position:absolute;right:60px;bottom:-70px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.08);}
+.hero-top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
+.hero-week{font-size:26px;font-weight:800;letter-spacing:.3px;cursor:pointer;}
+.hero-week small{font-size:13px;font-weight:500;opacity:.85;margin-left:6px;}
+.hero-week .wk-caret{font-size:13px;opacity:.8;margin-left:4px;}
+.navbtns{display:flex;gap:8px;}
+.navbtn{width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.18);color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;transition:background .15s;}
+.navbtn:active{background:rgba(255,255,255,.32);}
+.hero-date{font-size:12.5px;opacity:.9;margin-top:12px;display:flex;align-items:center;gap:6px;position:relative;z-index:1;}
+.hero-count{margin-top:12px;display:flex;align-items:center;gap:14px;font-size:12px;opacity:.95;position:relative;z-index:1;}
+.hero-count b{font-size:16px;font-weight:800;}
+.hero-count .sep{width:1px;height:12px;background:rgba(255,255,255,.35);}
+
+/* week pager */
+.pager{overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.pager::-webkit-scrollbar{display:none;}
+.pager .track{display:flex;align-items:flex-start;}
+.page{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;padding:0 10px;}
+
+/* grid */
+.ttwrap{position:relative;border-radius:16px;background:var(--card);box-shadow:var(--shadow);overflow:hidden;}
+.grid{display:grid;grid-template-columns:46px repeat(7,1fr);grid-auto-rows:64px;grid-template-rows:repeat(12,64px);max-width:600px;margin:0 auto;}
+.grid .ghead{display:flex;flex-direction:column;align-items:center;justify-content:center;border-bottom:1px solid var(--line);font-size:10px;color:#9aa0aa;padding-bottom:2px;}
+.grid .ghead .lnum{display:inline-flex;width:24px;height:24px;border-radius:50%;align-items:center;justify-content:center;font-size:13px;font-weight:700;margin-top:2px;color:var(--ink);}
+.grid .ghead.today{color:var(--accent);}
+.grid .ghead.today .lnum{background:var(--accent);color:#fff;box-shadow:0 3px 8px rgba(90,91,216,.35);}
+.sect{display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--faint);border-right:1px solid var(--line);border-top:1px solid var(--line);background:var(--card);}
+.timecell{display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--card);}
+.timecell .pn{font-size:13px;font-weight:700;color:var(--ink);}
+.timecell .pt{font-size:8px;color:var(--faint);line-height:1.35;font-variant-numeric:tabular-nums;}
+.course{position:relative;border-radius:13px;padding:7px 5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;background:#fff;border:1px solid #f0f1f6;box-shadow:var(--shadow-sm);margin:1.5px;overflow:hidden;transition:transform .12s;}
+.course:active{transform:scale(.95);}
+.course::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3.5px;background:var(--acc);}
+.course .badge{width:8px;height:8px;border-radius:3px;background:var(--acc);margin-top:4px;opacity:.9;}
+.course .cname{font-size:11px;font-weight:700;line-height:1.22;margin-top:5px;color:var(--ink);word-break:break-all;}
+.course .croom{font-size:8.5px;line-height:1.25;margin-top:3px;color:var(--soft);word-break:break-all;opacity:.85;}
+.course .ctype{position:absolute;top:5px;right:5px;font-size:7px;color:#fff;background:var(--acc);border-radius:4px;padding:1px 3px;}
+.bg-none{display:flex;align-items:center;justify-content:center;color:#dfe2ea;font-size:14px;}
+.page-tip{padding:12px 4px 0;color:var(--faint);font-size:11px;text-align:center;}
+
+/* bottom sheet (generic) */
+.mask{position:fixed;inset:0;background:rgba(15,17,26,.32);z-index:40;opacity:0;pointer-events:none;transition:opacity .22s;}
+.mask.show{opacity:1;pointer-events:auto;}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-width:600px;margin:0 auto;background:#fff;z-index:50;border-radius:22px 22px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.18);transform:translateY(110%);transition:transform .28s cubic-bezier(.32,.72,.24,1);padding:8px 20px calc(var(--safe-bottom) + 18px);}
+.sheet.show{transform:translateY(0);}
+.grab{width:40px;height:4px;border-radius:99px;background:#e2e4ec;margin:8px auto 14px;}
+.s-title{font-size:20px;font-weight:800;line-height:1.35;padding-right:34px;}
+.s-close{position:absolute;top:16px;right:16px;width:28px;height:28px;border-radius:50%;background:#f1f2f6;color:#7c818e;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;}
+.s-weeks{display:inline-flex;align-items:center;gap:5px;margin-top:12px;font-size:12.5px;font-weight:700;color:var(--accent);background:rgba(90,91,216,.09);border-radius:8px;padding:4px 9px;}
+.s-timerow{display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap;}
+.tchip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:#fff;border-radius:8px;padding:5px 9px;}
+.tchip.soft{background:#f2f3f7;color:#4c5160;font-weight:500;}
+.tchip.soft b{color:var(--ink);font-weight:700;}
+.s-rows{margin-top:10px;background:#f7f8fb;border-radius:14px;padding:12px 14px;}
+.s-row{display:flex;align-items:flex-start;font-size:13px;line-height:1.5;}
+.s-row .k{width:52px;flex:none;color:var(--faint);font-size:12px;padding-top:1px;}
+.s-row .v{flex:1;color:var(--ink);font-weight:500;}
+.s-note{margin-top:12px;font-size:12px;color:var(--soft);background:#fff6e6;border-radius:10px;padding:9px 12px;display:none;}
+
+/* week picker sheet */
+.wk-title{font-size:16px;font-weight:800;text-align:center;padding:0 30px;}
+.wk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;max-height:52vh;overflow:auto;padding-bottom:6px;}
+.wk-item{border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:all .15s;}
+.wk-item .wno{font-size:14px;font-weight:700;}
+.wk-item .wdate{font-size:10px;color:var(--soft);margin-top:3px;}
+.wk-item.active{border-color:var(--accent);background:rgba(90,91,216,.07);color:var(--accent);}
+.wk-item.now{position:relative;}
+.wk-item.now::after{content:"本周";position:absolute;top:5px;right:6px;font-size:8px;background:var(--accent);color:#fff;border-radius:4px;padding:1px 4px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- top bar -->
+  <div class="topbar">
+    <div class="top-inner">
+      <div class="logo">课</div>
+      <div class="tb-mid">
+        <div class="tb-sem" id="semLabel">2026-2027 第1学期</div>
+        <div class="tb-weekrow">
+          <span class="tb-week" id="tbWeek">第1周</span>
+          <span class="chip" id="todayChip" style="display:none"><span class="dot"></span>本周</span>
+        </div>
+      </div>
+      <div class="iconbtn" id="goToday" title="回到本周">◎</div>
+    </div>
+  </div>
+
+  <!-- hero -->
+  <div class="hero">
+    <div class="hero-top">
+      <div class="hero-week" id="heroWeek">第 <span id="heroNum">1</span> 周<span class="wk-caret">▾</span><small id="heroHint"></small></div>
+      <div class="navbtns">
+        <div class="navbtn" id="prevW">‹</div>
+        <div class="navbtn" id="nextW">›</div>
+      </div>
+    </div>
+    <div class="hero-date" id="heroDate"></div>
+    <div class="hero-count">
+      <span>本周 <b id="cCourses">0</b> 门课</span><span class="sep"></span>
+      <span>共 <b id="cPeriods">0</b> 节</span>
+    </div>
+  </div>
+
+  <!-- weeks pager -->
+  <div class="pager" id="pager">
+    <div class="track" id="track"></div>
+  </div>
+
+  <div class="page-tip">左右滑动 · 或点箭头 / 点周数自由选周</div>
+</div>
+
+<!-- week picker -->
+<div class="mask" id="mask2" onclick="closePicker()"></div>
+<div class="sheet" id="picker">
+  <div class="grab"></div>
+  <div class="wk-title">选择上课周</div>
+  <span class="s-close" onclick="closePicker()">✕</span>
+  <div class="wk-grid" id="wkGrid"></div>
+</div>
+
+<!-- detail sheet -->
+<div class="mask" id="mask" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+  <div class="grab"></div>
+  <div class="s-title" id="sTitle"></div>
+  <span class="s-close" onclick="closeSheet()">✕</span>
+  <div class="s-weeks" id="sWeeks"></div>
+  <div class="s-timerow" id="sTimeout"></div>
+  <div class="s-rows">
+    <div class="s-row"><div class="k">教室</div><div class="v" id="sRoom"></div></div>
+    <div class="s-row"><div class="k">老师</div><div class="v" id="sTeacher"></div></div>
+    <div class="s-row" id="sClsRow" style="display:none"><div class="k">班级</div><div class="v" id="sCls"></div></div>
+  </div>
+  <div class="s-note" id="sNote"></div>
+</div>
+
+<script>
+const DAY_NAMES=['一','二','三','四','五','六','日'];
+const DOW_FULL=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
+const PERIODS=[
+ {s:'08:10',e:'08:55'},{s:'09:05',e:'09:50'},{s:'10:15',e:'11:00'},{s:'11:15',e:'12:00'},
+ {s:'14:40',e:'15:25'},{s:'15:35',e:'16:20'},{s:'16:30',e:'17:15'},{s:'17:25',e:'18:10'},
+ {s:'19:10',e:'19:55'},{s:'20:05',e:'20:50'}
+];
+const SECTIONS=[{name:'上午',start:1,end:4},{name:'下午',start:5,end:8},{name:'晚上',start:9,end:10}];
+const SEM_START=new Date(2026,8,7); // 第1周周一(9月7日)，可按需修改
+const SEMESTER_LABEL="2026-2027 第1学期"; // 学期名称，可按需修改
+const TOTAL_WEEKS=18;
+var SCHEDULE=[{"name":"财会基本技能实训●","day":0,"p1":1,"p2":2,"weeks":"15","room":"知行楼718（实验室）（原20号楼）","teacher":"曹晓鹏","cls":"本科财务2501","note":""},{"name":"财会基本技能实训●","day":0,"p1":1,"p2":2,"weeks":"16","room":"知行楼718（实验室）（原20号楼）","teacher":"刘俊彦","cls":"本科财务2501","note":""},{"name":"党史★","day":1,"p1":1,"p2":2,"weeks":"1-8","room":"勤毅楼505(多媒体)","teacher":"张立莹","cls":"本科财务2501;本科财务2502;本科财务2503春","note":""},{"name":"财会基本技能实训●","day":1,"p1":1,"p2":6,"weeks":"15","room":"知行楼718（实验室）（原20号楼）","teacher":"曹晓鹏","cls":"本科财务2501","note":""},{"name":"财会基本技能实训●","day":1,"p1":1,"p2":6,"weeks":"16","room":"知行楼718（实验室）（原20号楼）","teacher":"刘俊彦","cls":"本科财务2501","note":""},{"name":"大学英语Ⅱ★","day":1,"p1":3,"p2":4,"weeks":"1,4,7,10,13","room":"力行楼706（语音室）（原10号楼）","teacher":"谢艳楼","cls":"本科财务2501","note":""},{"name":"大学英语Ⅱ★","day":1,"p1":3,"p2":4,"weeks":"2-3,5-6,8-9,11-12,14,17-18","room":"勤毅楼501(多媒体)","teacher":"谢艳楼","cls":"本科财务2501","note":""},{"name":"财务会计★","day":1,"p1":5,"p2":6,"weeks":"1-14,17-18","room":"勤毅楼515(多媒体)","teacher":"王慧","cls":"本科财务2501","note":""},{"name":"财会基本技能实训●","day":2,"p1":1,"p2":4,"weeks":"15","room":"知行楼718（实验室）（原20号楼）","teacher":"曹晓鹏","cls":"本科财务2501","note":""},{"name":"财会基本技能实训●","day":2,"p1":1,"p2":4,"weeks":"16","room":"知行楼718（实验室）（原20号楼）","teacher":"刘俊彦","cls":"本科财务2501","note":""},{"name":"高等数学（B）Ⅱ★","day":2,"p1":3,"p2":4,"weeks":"1-14","room":"勤毅楼508(多媒体)","teacher":"李秀展","cls":"本科财务2501;本科财务2502","note":""},{"name":"财务会计★","day":3,"p1":1,"p2":2,"weeks":"1-14,17-18","room":"勤毅楼515(多媒体)","teacher":"王慧","cls":"本科财务2501","note":""},{"name":"财会基本技能实训●","day":3,"p1":1,"p2":6,"weeks":"15","room":"知行楼718（实验室）（原20号楼）","teacher":"刘俊彦","cls":"本科财务2501","note":""},{"name":"财会基本技能实训●","day":3,"p1":1,"p2":6,"weeks":"16","room":"知行楼718（实验室）（原20号楼）","teacher":"曹晓鹏","cls":"本科财务2501","note":""},{"name":"大学生职业发展规划★","day":3,"p1":5,"p2":6,"weeks":"3","room":"勤毅楼506(多媒体)","teacher":"韩小甜","cls":"本科财务2501;本科财务2502","note":""},{"name":"国家安全教育★","day":3,"p1":5,"p2":6,"weeks":"4","room":"勤毅楼502(多媒体)","teacher":"张莉超","cls":"本科财务2501;本科财务2502","note":""},{"name":"高等数学（B）Ⅱ★","day":4,"p1":1,"p2":2,"weeks":"4-13","room":"勤毅楼508(多媒体)","teacher":"李秀展","cls":"本科财务2501;本科财务2502","note":""},{"name":"财会基本技能实训●","day":4,"p1":1,"p2":6,"weeks":"15","room":"知行楼718（实验室）（原20号楼）","teacher":"刘俊彦","cls":"本科财务2501","note":""},{"name":"财会基本技能实训●","day":4,"p1":1,"p2":6,"weeks":"16","room":"知行楼718（实验室）（原20号楼）","teacher":"曹晓鹏","cls":"本科财务2501","note":""},{"name":"大学生职业发展规划★","day":4,"p1":3,"p2":4,"weeks":"1-2,4-8","room":"勤毅楼506(多媒体)","teacher":"韩小甜","cls":"本科财务2501;本科财务2502","note":""},{"name":"劳动教育★","day":4,"p1":5,"p2":6,"weeks":"1-8","room":"勤毅楼305(多媒体)","teacher":"吴亚楠","cls":"本科财务2501;本科财务2502;本科财务2503春","note":""},{"name":"大学体育Ⅱ-板式网球★","day":0,"p1":3,"p2":4,"weeks":"1-18","room":"板式网球","teacher":"焦振超","cls":"2025","note":""},{"name":"思想道德与法治★","day":0,"p1":5,"p2":6,"weeks":"1-14,17-18","room":"08#101（多媒体）（原7号楼）","teacher":"王娟2","cls":"本科财务2501;本科财务2502","note":""},{"name":"财会基本技能实训●","day":0,"p1":5,"p2":8,"weeks":"15","room":"知行楼617（实验室）（原20号楼）","teacher":"曹晓鹏","cls":"本科财务2501","note":""},{"name":"财会基本技能实训●","day":0,"p1":5,"p2":8,"weeks":"16","room":"知行楼617（实验室）（原20号楼）","teacher":"刘俊彦","cls":"本科财务2501","note":""},{"name":"西方经济学★","day":2,"p1":5,"p2":6,"weeks":"1-14,17-18","room":"勤毅楼515(多媒体)","teacher":"刘月莹","cls":"本科财务2501","note":""},{"name":"财会基本技能实训●","day":2,"p1":5,"p2":6,"weeks":"15","room":"知行楼718（实验室）（原20号楼）","teacher":"刘俊彦","cls":"本科财务2501","note":""},{"name":"财会基本技能实训●","day":2,"p1":5,"p2":6,"weeks":"16","room":"知行楼718（实验室）（原20号楼）","teacher":"曹晓鹏","cls":"本科财务2501","note":""},{"name":"国家安全教育★","day":1,"p1":7,"p2":8,"weeks":"3","room":"勤毅楼502(多媒体)","teacher":"张莉超","cls":"本科财务2501;本科财务2502","note":""},{"name":"人工智能与创新设计★","day":1,"p1":9,"p2":10,"weeks":"2-17","room":"02#306（实验室）","teacher":"宫品一","cls":"无","note":""}];
+
+const ACCENTS=['#6d5ae0','#3f7ce0','#18b3a2','#33a06b','#e6a23c','#e05a7a','#25b6c9','#8c6ff0','#ec8aa0','#4b9bd6','#7aa63f','#c95f9b'];
+function accFor(name){let h=0;for(let i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))>>>0;return ACCENTS[h%ACCENTS.length];}
+const weeksCache={};
+function weeksSet(str){if(weeksCache[str])return weeksCache[str];const set=new Set();if(!str)return set;String(str).split(',').forEach(t=>{t=t.trim();if(!t)return;const i=t.indexOf('-');if(i>=0){const a=+t.slice(0,i),b=+t.slice(i+1);for(let x=a;x<=b;x++)set.add(x);}else set.add(+t);});weeksCache[str]=set;return set;}
+function active(s,w){return weeksSet(s.weeks).has(w);}
+function fmtWeeks(str){if(!str)return '全部周';return '第'+str.replace(/,/g,'、')+'周';}
+function splitName(n){const m=n.match(/^(.+?)([★●◆◇○])$/);return m?{title:m[1],type:m[2]}:{title:n,type:''};}
+function el(t,c,txt,style){const e=document.createElement(t);if(c)e.className=c;if(txt!=null)e.textContent=txt;if(style)for(const k in style)e.style[k]=style[k];return e;}
+
+let curWeek=currentWeek();
+let selWeek=curWeek;
+function currentWeek(){
+  const now=new Date();const d=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  let w=Math.floor((d-SEM_START)/(7*86400000))+1;if(w<1)w=1;if(w>TOTAL_WEEKS)w=TOTAL_WEEKS;return w;
+}
+function weekStart(w){return new Date(SEM_START.getTime()+(w-1)*7*86400000);}
+function today(){const n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate());}
+function coursesForWeek(w){const res=[[],[],[],[],[],[],[]];SCHEDULE.forEach(s=>{if(active(s,w))res[s.day].push(s);});res.forEach(a=>a.sort((x,y)=>x.p1-y.p1||x.p2-y.p2));return res;}
+
+function buildWeekPage(w){
+  const page=el('div','page');
+  const byDay=coursesForWeek(w);
+  const grid=el('div','grid');
+  const start=weekStart(w);
+  graphHead(grid,start);
+  SECTIONS.forEach(sec=>{grid.appendChild(el('div','sect',sec.name,{gridColumn:'1',gridRow:(sec.start+1)+' / '+(sec.end+2),borderTop:'1px solid var(--line)'}));});
+  for(let p=1;p<=10;p++){const tc=el('div','timecell');tc.style.gridColumn='2';tc.style.gridRow=(p+1)+' / '+(p+2);tc.innerHTML='<span class="pn">'+p+'</span><span class="pt">'+PERIODS[p-1].s+'<br>'+PERIODS[p-1].e+'</span>';grid.appendChild(tc);}
+  for(let d=0;d<7;d++){
+    const list=byDay[d];
+    if(list.length===0){const e=el('div','bg-none','·',{gridColumn:(d+2)+' / '+(d+3),gridRow:'2 / 13'});grid.appendChild(e);continue;}
+    list.forEach(s=>{
+      const col=d+2,row=s.p1+1,span=s.p2-s.p1+1;
+      const acc=accFor(s.name);const {title,type}=splitName(s.name);
+      const b=el('div','course');b.style.setProperty('--acc',acc);
+      b.style.gridColumn=col+' / '+(col+1);b.style.gridRow=row+' / '+(row+span);
+      b.innerHTML='<span class="badge"></span><div class="cname">'+title+'</div>'+(s.room?'<div class="croom">'+s.room+'</div>':'')+(type?'<div class="ctype">'+type+'</div>':'');
+      b.onclick=()=>openSheet(s);
+      grid.appendChild(b);
+    });
+  }
+  page.appendChild(grid);
+  return page;
+}
+function graphHead(grid,start){
+  grid.appendChild(el('div','rail ghead','',{gridColumn:'1'}));
+  for(let d=0;d<7;d++){
+    const dd=new Date(start.getTime()+d*86400000);
+    const h=el('div','ghead');h.style.gridColumn=(d+2)+' / '+(d+3);
+    const isT=dd.getTime()===today().getTime();if(isT)h.classList.add('today');
+    h.innerHTML='<span style="color:'+(isT?'var(--accent)':'#9aa0aa')+'">'+DAY_NAMES[d]+'</span><span class="lnum">'+dd.getDate()+'</span>';
+    grid.appendChild(h);
+  }
+}
+
+function renderAll(){
+  const track=document.getElementById('track');track.innerHTML='';
+  for(let w=1;w<=TOTAL_WEEKS;w++)track.appendChild(buildWeekPage(w));
+  updateHero();snapTo(selWeek,false);
+}
+function updateHero(){
+  document.getElementById('tbWeek').textContent='第'+selWeek+'周';
+  document.getElementById('heroNum').textContent=selWeek;
+  document.getElementById('todayChip').style.display=(selWeek===curWeek)?'inline-flex':'none';
+  const start=weekStart(selWeek),end=new Date(start.getTime()+6*86400000);
+  document.getElementById('heroDate').textContent='📅 '+(start.getMonth()+1)+'月'+start.getDate()+'日 — '+(end.getMonth()+1)+'月'+end.getDate()+'日';
+  const byDay=coursesForWeek(selWeek);let courses=0,periods=0;const seen=new Set();
+  byDay.forEach(list=>list.forEach(s=>{periods+=(s.p2-s.p1+1);if(!seen.has(s.name)){seen.add(s.name);courses++;}}));
+  document.getElementById('cCourses').textContent=courses;
+  document.getElementById('cPeriods').textContent=periods;
+  document.getElementById('heroHint').textContent='';
+}
+
+const pager=document.getElementById('pager');
+function snapTo(w,anim){const idx=w-1;pager.scrollTo({left:idx*pager.clientWidth,behavior:anim?'smooth':'instant'});}
+let settleTimer;
+pager.addEventListener('scroll',()=>{clearTimeout(settleTimer);settleTimer=setTimeout(()=>{const idx=Math.round(pager.scrollLeft/pager.clientWidth);const w=idx+1;if(w>=1&&w<=TOTAL_WEEKS&&w!==selWeek){selWeek=w;updateHero();}},90);},{passive:true});
+document.getElementById('prevW').onclick=()=>{if(selWeek>1){selWeek--;updateHero();snapTo(selWeek,true);}};
+document.getElementById('nextW').onclick=()=>{if(selWeek<TOTAL_WEEKS){selWeek++;updateHero();snapTo(selWeek,true);}};
+document.getElementById('goToday').onclick=()=>{selWeek=curWeek;updateHero();snapTo(selWeek,true);};
+document.getElementById('heroWeek').onclick=openPicker;
+
+function openPicker(){
+  const g=document.getElementById('wkGrid');g.innerHTML='';
+  for(let w=1;w<=TOTAL_WEEKS;w++){
+    const st=weekStart(w),en=new Date(st.getTime()+6*86400000);
+    const item=el('div','wk-item');if(w===selWeek)item.classList.add('active');if(w===curWeek)item.classList.add('now');
+    item.innerHTML='<div class="wno">第'+w+'周</div><div class="wdate">'+(st.getMonth()+1)+'月'+st.getDate()+'日-'+((en.getMonth()+1))+'月'+en.getDate()+'日</div>';
+    item.onclick=()=>{selWeek=w;updateHero();snapTo(w,true);closePicker();};
+    g.appendChild(item);
+  }
+  document.getElementById('picker').classList.add('show');document.getElementById('mask2').classList.add('show');
+}
+function closePicker(){document.getElementById('picker').classList.remove('show');document.getElementById('mask2').classList.remove('show');}
+
+const TYPE={'◆':'实验','●':'实践','◇':'上机','○':'讨论','★':'讲课'};
+function openSheet(s){
+  const {title,type}=splitName(s.name);const acc=accFor(s.name);
+  document.getElementById('sTitle').innerHTML=title+(type?'<span style="background:'+acc+';color:#fff;border-radius:6px;padding:1px 6px;font-size:11px;font-weight:700;margin-left:6px">'+type+'</span>':'');
+  document.getElementById('sWeeks').textContent=fmtWeeks(s.weeks)+' · 共'+weeksSet(s.weeks).size+'周';
+  const time=PERIODS[s.p1-1].s+' — '+PERIODS[s.p2-1].e;
+  const trow=document.getElementById('sTimeout');trow.innerHTML='';
+  const c1=el('span','tchip',DOW_FULL[s.day]);c1.style.background=acc;trow.appendChild(c1);
+  trow.appendChild(el('span','tchip soft','第'+(s.p1)+(s.p2>s.p1?'-'+s.p2:'')+'节'));
+  const tc3=el('span','tchip soft');tc3.innerHTML='<b>'+time+'</b>';trow.appendChild(tc3);
+  document.getElementById('sRoom').textContent=s.room||'未安排';
+  document.getElementById('sTeacher').textContent=s.teacher||'未安排';
+  const cls=s.cls||'';const cr=document.getElementById('sClsRow');if(cls){cr.style.display='flex';document.getElementById('sCls').textContent=cls;}else cr.style.display='none';
+  const note=s.note||'';const nr=document.getElementById('sNote');if(note){nr.style.display='block';nr.textContent='备注：'+note;}else nr.style.display='none';
+  document.getElementById('mask').classList.add('show');document.getElementById('sheet').classList.add('show');
+}
+function closeSheet(){document.getElementById('mask').classList.remove('show');document.getElementById('sheet').classList.remove('show');}
+
+renderAll();
+</script>
+</body>
+</html>
