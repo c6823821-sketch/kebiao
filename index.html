@@ -444,6 +444,10 @@ function addCat(){
 }
 function openBg(){renderTabs();renderBgGrid();document.getElementById('swRand').classList.toggle('on',bgRand);document.getElementById('swEdit').classList.toggle('on',bgEdit);document.getElementById('bgSheet').classList.add('show');document.getElementById('mask3').classList.add('show');}
 function closeBg(){document.getElementById('bgSheet').classList.remove('show');document.getElementById('mask3').classList.remove('show');}
+function nativeSend(action, data){
+  try{ if(window.AndroidBridge && window.AndroidBridge[action]){ if(data!=null) window.AndroidBridge[action](data); else window.AndroidBridge[action](); return true; } }catch(e){}
+  try{ location.href='kebiao://'+action+(data!=null?('?d='+encodeURIComponent(data)):''); return true; }catch(e){ return false; }
+}
 function tryNativePick(ev){
   try{
     if(window.AndroidBridge&&window.AndroidBridge.pickMedia){
@@ -463,16 +467,14 @@ function renderBgGrid(){
     function setAct(s){ var a=document.getElementById('actLine'); if(a)a.textContent=s; }
     const addI=el('div','bg-item');addI.innerHTML='<div class="bgnone">＋ 相册选图片</div>';
     addI.onclick=function(){
-      if(window.AndroidBridge&&window.AndroidBridge.pickImage){ setAct('已调用【原生相册】接口…如果没反应，就是安卓那边没起来'); window.AndroidBridge.pickImage(); return; }
-      setAct('未检测到 App 原生接口 → 走【网页文件选择】（网页版无法用系统相册）');
-      document.getElementById('fileIn').click();
+      if(nativeSend('pickImage')){ setAct('已调用原生相册接口…'); return; }
+      setAct('网页版无法用系统相册'); document.getElementById('fileIn').click();
     };
     g.appendChild(addI);
     const addV=el('div','bg-item');addV.innerHTML='<div class="bgnone">＋ 相册选视频</div>';
     addV.onclick=function(){
-      if(window.AndroidBridge&&window.AndroidBridge.pickVideo){ setAct('已调用【原生相册】接口…如果没反应，就是安卓那边没起来'); window.AndroidBridge.pickVideo(); return; }
-      setAct('未检测到 App 原生接口 → 走【网页文件选择】（网页版无法用系统相册）');
-      document.getElementById('fileIn').click();
+      if(nativeSend('pickVideo')){ setAct('已调用原生相册接口…'); return; }
+      setAct('网页版无法用系统相册'); document.getElementById('fileIn').click();
     };
     g.appendChild(addV);
     const items=getUserItems().filter(it=>(it.c||'my')===catId);
@@ -532,7 +534,7 @@ document.getElementById('fileIn').onchange=async function(e){
 /* ---------- 上课提醒 ---------- */
 function pushReminders(){
   try{
-    if(!window.AndroidBridge||!window.AndroidBridge.schedule)return;
+    if(!window.__NATIVE&&!window.AndroidBridge)return;
     const now=Date.now(),list=[];
     for(let w=1;w<=TOTAL_WEEKS;w++){
       const ws=weekStart(w);
@@ -549,7 +551,7 @@ function pushReminders(){
       });
     }
     list.sort((a,b)=>a.t-b.t);
-    window.AndroidBridge.schedule(JSON.stringify(list.slice(0,80)));
+    nativeSend('schedule', JSON.stringify(list.slice(0,80)));
   }catch(e){}
 }
 
@@ -591,7 +593,7 @@ function showVer(){
       try{ if(window.AndroidBridge.permStatus) pm=' · 相册权限：'+window.AndroidBridge.permStatus(); }catch(e){}
     }
   }catch(e){}
-  if(!isApp && window.__NATIVE){ v='App（原生已连接）'; isApp=true; pm=' · 用屏幕右下角紫色按钮选图'; }
+  if(!isApp && window.__NATIVE){ v='App v'+(window.__NATIVE_VERSION||''); isApp=true; pm=' · 选图请用右下角「相册」按钮'; }
   const el2=document.getElementById('verLine');
   if(el2) el2.textContent='当前版本：'+v+(v==='网页版'?'（网页版无法调用相册，请装 APK）':pm);
   setBadge(isApp, isApp?window.AndroidBridge.version():'');
