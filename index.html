@@ -32,6 +32,10 @@ body.bg-on .topbar{background:rgba(255,255,255,.42);border-bottom-color:rgba(0,0
 body.bg-on .navbtn{background:rgba(255,255,255,.72);}
 .navbtn:active{background:#e6e8f2;}
 .navbtn.today{font-size:12.5px;background:rgba(88,86,214,.14);color:var(--accent);}
+.modebadge{font-size:9.5px;font-weight:800;border-radius:6px;padding:2px 6px;margin-left:4px;letter-spacing:.3px;}
+.modebadge.app{background:#e3f7ec;color:#0f8a58;}
+.modebadge.web{background:#ffe8ec;color:#d02b45;}
+.actline{font-size:11px;color:#5856d6;text-align:center;margin-top:6px;font-weight:700;min-height:14px;}
 .chipnow{font-size:9.5px;color:#fff;background:var(--accent);border-radius:6px;padding:1px 5px;font-weight:700;}
 
 .pager{overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
@@ -148,7 +152,7 @@ label.btn{display:inline-flex;align-items:center;justify-content:center;cursor:p
   <div class="topbar">
     <div class="logo" id="fabBg" title="背景"><svg viewBox="0 0 24 24" width="21" height="21"><path fill="#fff" d="M21 19V5c0-1.1-.9-2-2-2H5c-.9 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z"/></svg></div>
     <div class="wk" id="wkOpen">
-      <div class="wk-title"><span id="wkTitle">第 2 周</span><span class="caret">▾</span><span class="chipnow" id="chipnow" style="display:none">本周</span></div>
+      <div class="wk-title"><span id="wkTitle">第 2 周</span><span class="caret">▾</span><span class="chipnow" id="chipnow" style="display:none">本周</span><span class="modebadge web" id="modeBadge">…</span></div>
       <div class="wk-sub" id="wkSub"></div>
     </div>
     <div class="navs">
@@ -173,6 +177,7 @@ label.btn{display:inline-flex;align-items:center;justify-content:center;cursor:p
   <div class="grab"></div><div class="wk-title2">背景</div><span class="m-close" onclick="closeBg()">✕</span>
   <div class="tabs" id="bgTabs"></div>
   <div class="verline" id="verLine"></div>
+  <div class="actline" id="actLine"></div>
   <div class="bg-grid" id="bgGrid"></div>
   <div class="bg-row"><span>每次打开随机换一张</span><div class="sw" id="swRand"></div></div>
   <div class="bg-row"><span>用自己的照片 / 视频 / 实况</span><label class="btn" for="fileIn">从相册选</label></div>
@@ -328,7 +333,18 @@ function buildWeekPage(w){
   page.appendChild(grid);return page;
 }
 
-function renderAll(){const t=document.getElementById('track');t.innerHTML='';for(let w=1;w<=TOTAL_WEEKS;w++)t.appendChild(buildWeekPage(w));updateTop();snapTo(selWeek,false);}
+let pagesBuilt={};
+function pageEl(w){
+  const holder=document.getElementById('track').children[w-1];
+  if(holder&&!pagesBuilt[w]){ holder.innerHTML=''; holder.appendChild(buildWeekPage(w)); pagesBuilt[w]=true; }
+  return holder;
+}
+function ensureAround(w){ for(let k=w-1;k<=w+1;k++){ if(k>=1&&k<=TOTAL_WEEKS) pageEl(k); } }
+function renderAll(){
+  const t=document.getElementById('track');t.innerHTML='';pagesBuilt={};
+  for(let w=1;w<=TOTAL_WEEKS;w++){ t.appendChild(el('div','page')); }
+  ensureAround(selWeek); updateTop(); snapTo(selWeek,false);
+}
 function updateTop(){
   document.getElementById('wkTitle').textContent='第 '+selWeek+' 周';
   document.getElementById('chipnow').style.display=(selWeek===curWeek)?'inline':'none';
@@ -340,12 +356,12 @@ function updateTop(){
 const pager=document.getElementById('pager');
 function snapTo(w,anim){pager.scrollTo({left:(w-1)*pager.clientWidth,behavior:anim?'smooth':'instant'});}
 let raf=0;
-pager.addEventListener('scroll',()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;const w=Math.round(pager.scrollLeft/pager.clientWidth)+1;if(w>=1&&w<=TOTAL_WEEKS&&w!==selWeek){selWeek=w;updateTop();}});},{passive:true});
-document.getElementById('prevW').onclick=()=>{if(selWeek>1){selWeek--;updateTop();snapTo(selWeek,true);}};
-document.getElementById('nextW').onclick=()=>{if(selWeek<TOTAL_WEEKS){selWeek++;updateTop();snapTo(selWeek,true);}};
-document.getElementById('goToday').onclick=()=>{selWeek=curWeek;updateTop();snapTo(selWeek,true);};
+pager.addEventListener('scroll',()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;const w=Math.round(pager.scrollLeft/pager.clientWidth)+1;if(w>=1&&w<=TOTAL_WEEKS&&w!==selWeek){selWeek=w;updateTop();ensureAround(w);}});},{passive:true});
+document.getElementById('prevW').onclick=()=>{if(selWeek>1){selWeek--;ensureAround(selWeek);updateTop();snapTo(selWeek,true);}};
+document.getElementById('nextW').onclick=()=>{if(selWeek<TOTAL_WEEKS){selWeek++;ensureAround(selWeek);updateTop();snapTo(selWeek,true);}};
+document.getElementById('goToday').onclick=()=>{selWeek=curWeek;ensureAround(selWeek);updateTop();snapTo(selWeek,true);};
 document.getElementById('wkOpen').onclick=openPicker;
-function openPicker(){const g=document.getElementById('wkGrid');g.innerHTML='';for(let w=1;w<=TOTAL_WEEKS;w++){const s=weekStart(w),e=new Date(s.getTime()+6*864e5);const it=el('div','wk-item');if(w===selWeek)it.classList.add('active');if(w===curWeek)it.classList.add('now');it.innerHTML='<div class="wno">第'+w+'周</div><div class="wdate">'+(s.getMonth()+1)+'月'+s.getDate()+'日-'+(e.getMonth()+1)+'月'+e.getDate()+'日</div>';it.onclick=()=>{selWeek=w;updateTop();snapTo(w,true);closePicker();};g.appendChild(it);}document.getElementById('picker').classList.add('show');document.getElementById('mask2').classList.add('show');}
+function openPicker(){const g=document.getElementById('wkGrid');g.innerHTML='';for(let w=1;w<=TOTAL_WEEKS;w++){const s=weekStart(w),e=new Date(s.getTime()+6*864e5);const it=el('div','wk-item');if(w===selWeek)it.classList.add('active');if(w===curWeek)it.classList.add('now');it.innerHTML='<div class="wno">第'+w+'周</div><div class="wdate">'+(s.getMonth()+1)+'月'+s.getDate()+'日-'+(e.getMonth()+1)+'月'+e.getDate()+'日</div>';it.onclick=()=>{selWeek=w;ensureAround(w);updateTop();snapTo(w,true);closePicker();};g.appendChild(it);}document.getElementById('picker').classList.add('show');document.getElementById('mask2').classList.add('show');}
 function closePicker(){document.getElementById('picker').classList.remove('show');document.getElementById('mask2').classList.remove('show');}
 
 function openModal(s){const {title,type}=splitName(s.name);const acc=accFor(title);
@@ -444,23 +460,32 @@ function renderBgGrid(){
   const isUser=(bgCat==='my')||(bgCat.indexOf('u:')===0);
   if(isUser){
     const catId=(bgCat.indexOf('u:')===0)?bgCat.slice(2):'my';
+    function setAct(s){ var a=document.getElementById('actLine'); if(a)a.textContent=s; }
     const addI=el('div','bg-item');addI.innerHTML='<div class="bgnone">＋ 相册选图片</div>';
-    addI.onclick=function(){ try{ if(window.AndroidBridge&&window.AndroidBridge.pickImage){window.AndroidBridge.pickImage();return;} }catch(e){} document.getElementById('fileIn').click(); };
+    addI.onclick=function(){
+      if(window.AndroidBridge&&window.AndroidBridge.pickImage){ setAct('已调用【原生相册】接口…如果没反应，就是安卓那边没起来'); window.AndroidBridge.pickImage(); return; }
+      setAct('未检测到 App 原生接口 → 走【网页文件选择】（网页版无法用系统相册）');
+      document.getElementById('fileIn').click();
+    };
     g.appendChild(addI);
     const addV=el('div','bg-item');addV.innerHTML='<div class="bgnone">＋ 相册选视频</div>';
-    addV.onclick=function(){ try{ if(window.AndroidBridge&&window.AndroidBridge.pickVideo){window.AndroidBridge.pickVideo();return;} }catch(e){} document.getElementById('fileIn').click(); };
+    addV.onclick=function(){
+      if(window.AndroidBridge&&window.AndroidBridge.pickVideo){ setAct('已调用【原生相册】接口…如果没反应，就是安卓那边没起来'); window.AndroidBridge.pickVideo(); return; }
+      setAct('未检测到 App 原生接口 → 走【网页文件选择】（网页版无法用系统相册）');
+      document.getElementById('fileIn').click();
+    };
     g.appendChild(addV);
     const items=getUserItems().filter(it=>(it.c||'my')===catId);
     items.forEach(it=>{
       const ti=el('div','bg-item'+(selBg===it.u?' active':''));
       ti.innerHTML=(it.k==='video'
         ? '<video src="'+it.u+'" muted loop playsinline autoplay></video>'
-        : '<img src="'+it.u+'">')+'<div class="tag">'+(it.n||'我的')+'</div>';
+        : '<img loading="lazy" decoding="async" src="'+it.u+'">')+'<div class="tag">'+(it.n||'我的')+'</div>';
       if(bgEdit){ const x=el('span','delx','✕'); x.onclick=(ev)=>{ev.stopPropagation();doRemove(it.u);}; ti.appendChild(x); }
       ti.onclick=()=>{ if(bgEdit){doRemove(it.u);return;} selBg=it.u; localStorage.setItem('kb_bg',it.u); activeBg=it.u; applyBg(it.u); renderBgGrid(); closeBg(); };
       g.appendChild(ti);
     });
-    if(!items.length) g.appendChild(el('div','bghint','点「＋ 相册选图片」或「＋ 相册选视频」，把手机相册里的素材加进来'));
+    if(!items.length) g.appendChild(el('div','bghint','点「＋ 相册选图片 / 视频」加素材；<br>也可以：在图库里选好 → 分享 → 选「我的课表」，直接设为背景'));
     if(bgCat.indexOf('u:')===0){
       const del=el('div','bg-item');del.innerHTML='<div class="bgnone" style="color:#e0486f">删除本分类</div>';
       del.onclick=()=>{ askConfirm('删除这个分类？里面的素材也会一起删掉',()=>{ const cid=bgCat.slice(2);
@@ -474,8 +499,8 @@ function renderBgGrid(){
   BGS.filter(b=>(b.cat===bgCat)&&!hidden.includes(b.id)).forEach(b=>{
     const it=el('div','bg-item'+(selBg===b.id?' active':''));
     if(b.id==='none')it.innerHTML='<div class="bgnone">无背景</div>';
-    else if(/\.(mp4|webm|mov)$/i.test(b.id)){var po=b.id.replace(/([^/]+)\.(mp4|webm|mov)$/i,'poster_$1.jpg');it.innerHTML='<video src="'+b.id+'" poster="'+po+'" muted loop playsinline autoplay preload="metadata"></video><div class="tag">'+b.n+' ▶</div>';}
-    else it.innerHTML='<img src="'+b.id+'"><div class="tag">'+b.n+'</div>';
+    else if(/\.(mp4|webm|mov)$/i.test(b.id)){var po=b.id.replace(/([^/]+)\.(mp4|webm|mov)$/i,'poster_$1.jpg');it.innerHTML='<video src="'+b.id+'" poster="'+po+'" muted loop playsinline preload="none"></video><div class="tag">'+b.n+' ▶</div>';}
+    else it.innerHTML='<img loading="lazy" decoding="async" src="'+b.id+'"><div class="tag">'+b.n+'</div>';
     if(bgEdit&&b.id!=='none'){ const x=el('span','delx','✕'); x.onclick=(ev)=>{ev.stopPropagation();const h=getHidden();h.push(b.id);setHidden(h);renderBgGrid();}; it.appendChild(x); }
     it.onclick=()=>{ if(bgEdit){ if(b.id==='none')return; const h=getHidden();h.push(b.id);setHidden(h);renderBgGrid();return;} selBg=b.id; localStorage.setItem('kb_bg',b.id); activeBg=b.id; applyBg(b.id); renderBgGrid(); closeBg(); };
     g.appendChild(it);
@@ -553,10 +578,23 @@ function askConfirm(title,cb){ openDlg(title,false,'',function(ok){ if(ok)cb(); 
 document.getElementById('dlgYes').onclick=function(){ const c=dlgCb, v=document.getElementById('dlgInput').value.trim(); closeDlg(); if(c)c(true,v); };
 document.getElementById('dlgNo').onclick=function(){ const c=dlgCb; closeDlg(); if(c)c(false,''); };
 document.getElementById('dlgInput').addEventListener('keydown',function(e){ if(e.key==='Enter')document.getElementById('dlgYes').click(); });
+function setBadge(isApp,v){
+  var b=document.getElementById('modeBadge'); if(!b)return;
+  b.className='modebadge '+(isApp?'app':'web');
+  b.textContent=isApp?('APP '+(v||'')):'网页';
+}
 function showVer(){
-  let v='网页版';
-  try{ if(window.AndroidBridge&&window.AndroidBridge.version) v='App v'+window.AndroidBridge.version(); }catch(e){}
-  const el2=document.getElementById('verLine'); if(el2) el2.textContent='当前版本：'+v+(v==='网页版'?'（网页版无法调用系统相册，请装 APK）':'');
+  let v='网页版', pm='', isApp=false;
+  try{
+    if(window.AndroidBridge&&window.AndroidBridge.version){
+      v='App v'+window.AndroidBridge.version(); isApp=true;
+      try{ if(window.AndroidBridge.permStatus) pm=' · 相册权限：'+window.AndroidBridge.permStatus(); }catch(e){}
+    }
+  }catch(e){}
+  if(!isApp && window.__NATIVE){ v='App（原生已连接）'; isApp=true; pm=' · 用屏幕右下角紫色按钮选图'; }
+  const el2=document.getElementById('verLine');
+  if(el2) el2.textContent='当前版本：'+v+(v==='网页版'?'（网页版无法调用相册，请装 APK）':pm);
+  setBadge(isApp, isApp?window.AndroidBridge.version():'');
 }
 window.addEventListener('load',showVer);
 function kickVideo(){ try{ var v=document.getElementById('bgv'); if(v&&v.style.display!=='none'&&v.paused){ v.play().catch(function(){}); } }catch(e){} }

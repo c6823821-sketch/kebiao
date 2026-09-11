@@ -1,0 +1,32 @@
+{
+ "v": 31,
+ "files": [
+  "index.html",
+  "bg/an1.jpg",
+  "bg/an2.jpg",
+  "bg/an3.jpg",
+  "bg/an4.jpg",
+  "bg/an5.jpg",
+  "bg/an6.jpg",
+  "bg/h1.jpg",
+  "bg/h2.jpg",
+  "bg/h3.jpg",
+  "bg/h4.jpg",
+  "bg/h5.jpg",
+  "bg/h6.jpg",
+  "bg/poster_v1_aurora.jpg",
+  "bg/poster_v2_stars.jpg",
+  "bg/poster_v3_liquid.jpg",
+  "bg/poster_v4_sakura.jpg",
+  "bg/sc1.jpg",
+  "bg/sc2.jpg",
+  "bg/sc3.jpg",
+  "bg/sc4.jpg",
+  "bg/sc5.jpg",
+  "bg/sc6.jpg",
+  "bg/v1_aurora.mp4",
+  "bg/v2_stars.mp4",
+  "bg/v3_liquid.mp4",
+  "bg/v4_sakura.mp4"
+ ]
+}
