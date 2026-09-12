@@ -537,7 +537,7 @@ function showRmdTip(n){
   try{
     var d=document.getElementById('rmdTip');
     if(!d){ d=document.createElement('div'); d.id='rmdTip'; d.className='rmdtip'; document.body.appendChild(d); }
-    d.textContent='上课提醒已设置（未来4周共 '+n+' 条）';
+    d.textContent='\u4e0a\u8bfe\u63d0\u9192\u5df2\u8bbe\u7f6e\uff08\u6574\u5b66\u671f \u00b7 \u5171 '+n+' \u8282\uff09';
     d.style.opacity='1';
     clearTimeout(window.__rmdT);
     window.__rmdT=setTimeout(function(){ d.style.opacity='0'; },3200);
@@ -546,24 +546,15 @@ function showRmdTip(n){
 function pushReminders(){
   try{
     if(!(window.__NATIVE || window.AndroidBridge))return;
-    const now=Date.now(),list=[];
-    for(let w=1;w<=TOTAL_WEEKS;w++){
-      const ws=weekStart(w);
-      SCHEDULE.forEach(s=>{
-        if(!active(s,w))return;
-        const dd=new Date(ws.getTime()+s.day*864e5);
-        const hm=PERIODS[s.p1-1].s.split(':');
-        const st=new Date(dd.getFullYear(),dd.getMonth(),dd.getDate(),+hm[0],+hm[1],0,0).getTime();
-        const t=st-LEAD_MIN*60000;
-        if(t>now+30000&&t<now+28*864e5){
-          const sp=splitName(s.name);
-          list.push({t:t,title:'还有 '+LEAD_MIN+' 分钟上课',body:sp.title+(s.room?' · '+shortRoom(s.room):'')+' · '+PERIODS[s.p1-1].s+' 开始'});
-        }
-      });
-    }
-    list.sort((a,b)=>a.t-b.t);
-    var sent = nativeSend('schedule', JSON.stringify(list.slice(0,160)));
-    if(sent) showRmdTip(list.length);
+    var lines=['SEM|'+SEM_START.getTime()+'|'+TOTAL_WEEKS];
+    SCHEDULE.forEach(function(s){
+      var tm=PERIODS[s.p1-1].s;
+      var nm=splitName(s.name).title.replace(/[|\n]/g,'');
+      var rm=shortRoom(s.room).replace(/[|\n]/g,'');
+      lines.push([s.day,s.p1,s.p2,s.weeks,nm,rm,tm].join('|'));
+    });
+    nativeSend('setsched', lines.join('\n'));
+    showRmdTip(lines.length-1);
   }catch(e){}
 }
 
