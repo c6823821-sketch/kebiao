@@ -545,8 +545,7 @@ function showRmdTip(n){
 }
 function pushReminders(){
   try{
-    var inApp = !!window.__NATIVE || (location.protocol === 'file:') || !!window.AndroidBridge;
-    if(!inApp)return;
+    if(!(window.__NATIVE || window.AndroidBridge))return;
     const now=Date.now(),list=[];
     for(let w=1;w<=TOTAL_WEEKS;w++){
       const ws=weekStart(w);
@@ -619,7 +618,8 @@ renderAll();
 applyBg(activeBg);
 applyScrim(scrimPct);
 showVer();
-pushReminders();
+setTimeout(pushReminders,2500);
+document.addEventListener('touchstart',function __r(){ pushReminders(); document.removeEventListener('touchstart',__r); },{passive:true});
 </script>
 </body>
 </html>
