@@ -554,7 +554,6 @@ function pushReminders(){
       lines.push([s.day,s.p1,s.p2,s.weeks,nm,rm,tm].join('|'));
     });
     nativeSend('setsched', lines.join('\n'));
-    showRmdTip(lines.length-1);
   }catch(e){}
 }
 
