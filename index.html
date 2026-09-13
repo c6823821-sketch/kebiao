@@ -554,6 +554,26 @@ function pushReminders(){
       lines.push([s.day,s.p1,s.p2,s.weeks,nm,rm,tm].join('|'));
     });
     nativeSend('setsched', lines.join('\n'));
+    // 兼容旧版 APK：同时发一份"未来10天的具体提醒"
+    try{
+      var now=Date.now(), list=[];
+      for(var w=1;w<=TOTAL_WEEKS;w++){
+        var ws=weekStart(w);
+        SCHEDULE.forEach(function(s){
+          if(!active(s,w))return;
+          var dd=new Date(ws.getTime()+s.day*864e5);
+          var hm=PERIODS[s.p1-1].s.split(':');
+          var st=new Date(dd.getFullYear(),dd.getMonth(),dd.getDate(),+hm[0],+hm[1],0,0).getTime();
+          var tt=st-15*60000;
+          if(tt>now+30000&&tt<now+10*864e5){
+            var sp=splitName(s.name);
+            list.push({t:tt,title:'还有 15 分钟上课',body:sp.title+(s.room?' · '+shortRoom(s.room):'')+' · '+PERIODS[s.p1-1].s+' 开始'});
+          }
+        });
+      }
+      list.sort(function(x,y){return x.t-y.t;});
+      nativeSend('schedule', JSON.stringify(list.slice(0,120)));
+    }catch(e){}
   }catch(e){}
 }
 
